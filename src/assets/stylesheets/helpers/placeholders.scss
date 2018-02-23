@@ -1,0 +1,28 @@
+%clear {
+  display: block;
+  clear: both;
+
+  &:before,
+  &:after {
+    content: '';
+    display: block;
+    clear: both;
+  }
+}
+
+%container {
+  position: relative;
+  z-index: 2;
+  width: $container--width;
+  margin-left: auto;
+  margin-right: auto;
+
+  @media (max-width: $container-responsive--width) {
+    width: 96%;
+  }
+}
+
+%flex-between {
+  display: flex;
+  justify-content: space-between;
+}

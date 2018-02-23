@@ -1,0 +1,10 @@
+.transactions {
+  &-title {
+    @extend %flex-between;
+    margin-bottom: 20px;
+
+    @media (max-width: $mobile--width) {
+      margin-bottom: 0;
+    }
+  }
+}

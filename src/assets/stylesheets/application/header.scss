@@ -1,0 +1,26 @@
+.header {
+  margin-bottom: 40px;
+  padding: 20px 0;
+  border-bottom: 1px solid fade-out(#95d5ff, 0.9);
+
+  @media (max-width: $mobile--width) {
+    margin-bottom: 30px;
+  }
+
+  .container {
+    @extend %flex-between;
+    align-items: center;
+  }
+
+  &-logo {
+    @include image-2x('../images/logo@2x.png');
+    display: block;
+    width: 200px;
+    height: 36px;
+
+    @media (max-width: $container-responsive--width) {
+      width: 36px;
+      background-size: 200px 100%;
+    }
+  }
+}

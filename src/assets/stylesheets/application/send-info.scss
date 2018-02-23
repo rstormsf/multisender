@@ -1,0 +1,18 @@
+.send-info {
+  overflow: hidden;
+
+  &-side {
+    float: left;
+    width: 50%;
+  }
+
+  &-i {
+    margin-bottom: 20px;
+  }
+
+  &-amount {
+    margin-top: 10px;
+    color: #9cd8ff;
+    font-size: 24px;
+  }
+}
