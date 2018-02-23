@@ -8,14 +8,12 @@ p, h1, h2, h3 {
 
 html {
   height: 100%;
-  background-color: #011d2f;
 }
 
 body {
-  min-height: 638px;
-  padding-bottom: 60px;
-  box-sizing: border-box;
   position: relative;
+  min-height: 100%;
+  box-sizing: border-box;
   background-color: #011d2f;
 
   &:after {
@@ -70,6 +68,8 @@ strong {
   @extend %container;
 
   &_bg {
+    padding-bottom: 60px;
+
     &:before {
       @include image-2x('../images/illustration@2x.png');
       content: '';
