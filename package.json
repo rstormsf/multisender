@@ -1,21 +1,31 @@
 {
   "name": "multi-sender-app",
   "version": "0.1.0",
-  "private": true,
+  "license": "GPL3",
   "dependencies": {
+    "mobx": "^3.5.1",
+    "mobx-react": "^4.4.2",
     "node-sass-chokidar": "0.0.3",
     "nodemon": "^1.15.1",
     "react": "^16.2.0",
+    "react-app-rewire-mobx": "^1.0.7",
+    "react-app-rewire-preact": "^1.0.1",
+    "react-app-rewired": "^1.4.1",
     "react-dom": "^16.2.0",
+    "react-json-view": "^1.16.1",
     "react-router-dom": "^4.2.2",
-    "react-scripts": "1.1.1"
+    "react-scripts": "1.1.1",
+    "react-validation": "^3.0.7",
+    "splash-screen": "^4.0.1",
+    "sweetalert": "^2.1.0",
+    "web3": "^1.0.0-beta.30"
   },
   "scripts": {
     "build-css": "node-sass-chokidar src/assets/stylesheets/application.scss -o src/assets/stylesheets --output-style=compressed",
     "watch-css": "nodemon -e scss -x \"npm run build-css\"",
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test --env=jsdom",
+    "eject": "react-app-rewired eject"
   }
 }

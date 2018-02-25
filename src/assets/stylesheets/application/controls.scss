@@ -11,6 +11,10 @@
 }
 
 .form {
+  span.error {
+    margin-left: 10px;
+    color: #fd7491;
+  }
   &_header {
     @extend %flex-between;
     align-items: center;
@@ -35,6 +39,7 @@
     }
   }
 }
+
 
 .input,
 .select,
@@ -106,7 +111,15 @@
   text-decoration: none;
   font-size: 16px;
   font-weight: bold;
-
+  &:disabled { 
+    -moz-box-shadow:    inset 0 0 10px fade-out(#0b4865, 0.7);
+    -webkit-box-shadow: inset 0 0 10px fade-out(#0b4865, 0.7);
+    box-shadow:         inset 0 0 10px fade-out(#0b4865, 0.7);
+    opacity: 0.88;
+  }
+  &:disabled:hover {
+    box-shadow:         inset 0 0 10px fade-out(#0b4865, 0.7);
+  }
   &:hover {
     box-shadow: 0px 10px 20px 0 fade-out(#10b3ff, 0.7);
   }
