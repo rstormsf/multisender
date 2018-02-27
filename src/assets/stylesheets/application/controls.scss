@@ -9,7 +9,28 @@
     font-family: 'Lato', sans-serif;
   }
 }
-
+#addresses-with-balances {
+  line-height: 20px;
+  &::-webkit-input-placeholder {
+    color: #8e9ea9;
+    opacity: 0.7;
+  }
+  
+  &:-moz-placeholder { /* Firefox 18- */
+    color: #8e9ea9;  
+    opacity: 0.7;
+  }
+  
+  &::-moz-placeholder {  /* Firefox 19+ */
+    color: #8e9ea9;  
+    opacity: 0.7;
+  }
+  
+  &:-ms-input-placeholder {
+    color: #8e9ea9;  
+    opacity: 0.7;
+  }
+}
 .form {
   span.error {
     margin-left: 10px;

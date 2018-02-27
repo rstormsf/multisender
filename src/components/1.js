@@ -8,7 +8,7 @@ import { form, control, button } from 'react-validation';
 import { inject, observer } from "mobx-react";
 import swal from 'sweetalert';
 import generateElement from '../generateElement'
-
+import Example from './example'
 const ownInput = ({ error, isChanged, isUsed, ...props }) => (
   <div>
     {isChanged && isUsed && error}
@@ -78,6 +78,7 @@ export class FirstStep extends React.Component {
   }
   onSubmit(e){
     e.preventDefault()
+    this.tokenStore.parseAddresses()
     this.props.history.push('/3')
   }
   render () {
@@ -86,7 +87,8 @@ export class FirstStep extends React.Component {
         <div className="content">
           <h1 className="title"><strong>Welcome to Token</strong> MultiSender</h1>
           <p className="description">
-            Please check out this tutorial
+            Please provide Token Address, JSON file with addresses <br />
+            This Dapp supports Mainnet, POA-Core, POA-sokol, Ropsten, Rinkeby, Kovan
           </p>
           <Form className="form" onSubmit={this.onSubmit}>
             <div className="form-inline">
@@ -100,7 +102,11 @@ export class FirstStep extends React.Component {
               </div>
             </div>
             <label htmlFor="addresses-with-balances" className="label">Addresses with Balances</label>
-            <Textarea validations={[required, isJson]} onBlur={this.onJsonChange} id="addresses-with-balances" className="textarea"></Textarea>
+            <Textarea 
+              data-gram 
+              validations={[required, isJson]}
+              placeholder={`Example: ${JSON.stringify(Example)}`}
+              onBlur={this.onJsonChange} id="addresses-with-balances" className="textarea"></Textarea>
             <Button className="button button_next">Next</Button>
           </Form>
         </div>
