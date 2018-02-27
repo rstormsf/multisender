@@ -156,10 +156,7 @@ class TokenStore {
         let balance = Object.values(account)[0];
         this.totalBalance = new BN(balance).plus(this.totalBalance).toString(10)
         const acc = {}
-        Object.defineProperty(acc, address, {
-          value: balance,
-          writable: true
-        });
+        acc[`"${address}"`] = balance
         newAddresses.push(acc)
         balance = this.multiplier.times(balance);
         this.balances_to_send.push(balance.toString(10))
