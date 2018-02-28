@@ -27,8 +27,8 @@ let getWeb3 = () => {
               console.log('This is Rinkeby', netId)
               break;
             case "42":
-              netIdName = 'Foundation'
-              console.log('This is Foundation', netId)
+              netIdName = 'Kovan'
+              console.log('This is Kovan', netId)
               break;
             case "99":
               netIdName = 'POA Core'
@@ -44,6 +44,9 @@ let getWeb3 = () => {
           }
           document.title = `${netIdName} - MultiSender dApp`
           var defaultAccount = web3.eth.defaultAccount || null;
+          if(defaultAccount === null){
+            reject({message: 'Please unlock your metamask and refresh the page'})
+          }
           results = {
             web3Instance: web3,
             netIdName,

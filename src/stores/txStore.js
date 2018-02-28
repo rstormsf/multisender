@@ -12,7 +12,6 @@ class TxStore {
     this.tokenStore = rootStore.tokenStore
     this.web3Store = rootStore.web3Store
     this.gasPriceStore = rootStore.gasPriceStore
-    // this._multisend = this._multisend.bind(this)
   }
 
   @action
@@ -59,7 +58,6 @@ class TxStore {
     console.log('slice', slice, addresses_to_send[0], balances_to_send[0], addPerTx)
     const web3 = this.web3Store.web3;
     const multisender = new web3.eth.Contract(MultiSenderAbi, proxyMultiSenderAddress);
-    console.log(addresses_to_send.length, balances_to_send.length)
 
     try {
       let encodedData = await multisender.methods.multisendToken(token_address, addresses_to_send, balances_to_send).encodeABI({from: this.web3Store.defaultAccount})
@@ -85,13 +83,14 @@ class TxStore {
       .on('transactionHash', (hash) => {
         console.log('txHash',hash)
         this.txHashToIndex[hash] = this.txs.length
-        this.txs.push({status: 'pending', name: `Sending Batch #${this.txs.length} ${this.tokenStore.tokenSymbol}`, hash})
+        this.txs.push({status: 'pending', name: `Sending Batch #${this.txs.length} ${this.tokenStore.tokenSymbol}\n
+          From ${addresses_to_send[0]} to: ${addresses_to_send[addresses_to_send.length-1]}
+        `, hash})
         this.getTxReceipt(hash)
   
       })
       .on('error', (error) => {
         console.log(error)
-        // swal("Error!", `Something went wrong!\n ${error}`, "error");
       })
       slice--;
       if (slice > 0) {
@@ -109,13 +108,33 @@ class TxStore {
     web3.eth.getTransaction(hash, (error, res) => {
       console.log(hash, res)
       if(res && res.blockNumber){
-        const index = this.txHashToIndex[hash]
-        this.txs[index].status = `mined`
+        this.getTxStatus(hash)
       } else {
         console.log('not mined yet', hash)
         setTimeout(() => {
           this.getTxReceipt(hash)
         }, 5000)
+      }
+    })
+  }
+
+  async getTxStatus(hash) {
+    console.log('GET TX STATUS', hash)
+    const web3 = this.web3Store.web3;
+    web3.eth.getTransactionReceipt(hash, (error, res) => {
+      console.log(hash, res)
+      if(res && res.blockNumber){
+        console.log('receipt', res)
+        if(res.status === '0x1'){
+          const index = this.txHashToIndex[hash]
+          this.txs[index].status = `mined`
+        } else {
+          const index = this.txHashToIndex[hash]
+          this.txs[index].status = `error`
+          this.txs[index].name = `Mined but with errors. Perhaps out of gas`
+        }
+      } else {
+        this.getTxStatus(hash)
       }
     })
   }

@@ -18,6 +18,7 @@
     "react-json-view": "^1.16.1",
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.1.1",
+    "react-spinners": "^0.2.6",
     "react-validation": "^3.0.7",
     "splash-screen": "^4.0.1",
     "store2": "^2.7.0",

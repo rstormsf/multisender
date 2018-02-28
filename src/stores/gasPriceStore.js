@@ -20,7 +20,7 @@ class GasPriceStore {
   }
 
   @computed get standardInHex() {
-    const toWei = Web3Utils.toWei(this.gasPrices.instant.toString(), 'gwei')
+    const toWei = Web3Utils.toWei(this.gasPrices.fast.toString(), 'gwei')
     return Web3Utils.toHex(toWei)
   }
 

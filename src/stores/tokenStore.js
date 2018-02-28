@@ -24,6 +24,7 @@ class TokenStore {
   @observable filteredAddresses = []
   @observable totalBalance = '0'
   @observable arrayLimit = 0
+  @observable errors = []
   proxyMultiSenderAddress = process.env.REACT_APP_PROXY_MULTISENDER
   
   constructor(rootStore) {
@@ -40,20 +41,22 @@ class TokenStore {
       this.decimals = await token.methods.decimals().call();
       return this.decimals
     } catch(e) {
-      console.error(e)
+      this.errors.push('Cannot get decimals for token contract.\n Please make sure you are on the right network and token address exists')
+      console.error('Get Decimals', e)
     }
   }
 
   async getBalance() {
     try {
-      const web3 = this.web3Store.web3;
-      const token = new web3.eth.Contract(ERC20ABI, this.tokenAddress);
-      const defAccTokenBalance = await token.methods.balanceOf(this.web3Store.defaultAccount).call();
-      this.defAccTokenBalance = new BN(defAccTokenBalance).div(this.multiplier).toString(10)
-      return this.defAccTokenBalance
+        const web3 = this.web3Store.web3;
+        const token = new web3.eth.Contract(ERC20ABI, this.tokenAddress);
+        const defAccTokenBalance = await token.methods.balanceOf(this.web3Store.defaultAccount).call();
+        this.defAccTokenBalance = new BN(defAccTokenBalance).div(this.multiplier).toString(10)
+        return this.defAccTokenBalance
     }
     catch(e){
-      console.error(e)
+      this.errors.push(`${this.web3Store.defaultAccount} doesn't have token balance.\n Please make sure you are on the right network and token address exists`)
+      console.error('getBalance',e)
     }
   }
   async getEthBalance() {
@@ -76,6 +79,7 @@ class TokenStore {
       return this.tokenSymbol
     }
     catch(e){
+      this.errors.push('Token with this Address doesnt exist.\n Please make sure you are on the right network and token address exists')
       console.error(e)
     }
   }
@@ -89,14 +93,16 @@ class TokenStore {
       return this.allowance
     }
     catch(e){
-      console.error(e)
+      this.errors.push(`Token address doesn't have allowance method.\n Please make sure you are on the right network and token address exists.\n
+         Your account: ${this.web3Store.defaultAccount}`)
+      console.error('GetAllowance',e)
     }
   }
 
   @action
   async getCurrentFee(){
     try {
-      await this.web3Store.getWeb3Promise.then(async () => {
+      this.web3Store.getWeb3Promise.then(async () => {
         const web3 = this.web3Store.web3;
         const multisender = new web3.eth.Contract(StormMultiSenderABI, this.proxyMultiSenderAddress);
         const currentFee = await multisender.methods.currentFee(this.web3Store.defaultAccount).call();
@@ -105,7 +111,7 @@ class TokenStore {
       }) 
     }
     catch(e){
-      console.error(e)
+      console.error('getCurrentFee',e)
     }
   }
 
@@ -119,21 +125,24 @@ class TokenStore {
       }) 
     }
     catch(e){
-      console.error(e)
+      console.error('GetArrayLimit', e)
     }
   }
 
   @action
   async setTokenAddress(tokenAddress) {
-    this.tokenAddress = tokenAddress;
-    await this.getDecimals(tokenAddress)
-    this.getBalance()
-    this.getAllowance()
-    this.getCurrentFee()
-    this.getTokenSymbol(tokenAddress)
-    this.getEthBalance()
-    this.getArrayLimit()
-    
+    await this.web3Store.getWeb3Promise.then(async () => {
+      if(Web3Utils.isAddress(this.web3Store.defaultAccount)){
+        this.tokenAddress = tokenAddress;
+        let decimals = await this.getDecimals(tokenAddress)
+        await this.getBalance()
+        await this.getAllowance()
+        await this.getCurrentFee()
+        this.getTokenSymbol(tokenAddress)
+        this.getEthBalance()
+        this.getArrayLimit()
+      }
+    })
   }
 
   setDecimals(decimals) {
@@ -178,7 +187,7 @@ class TokenStore {
   }
 
   @computed get totalCostInEth(){
-    const standardGasPrice = Web3Utils.toWei(this.gasPriceStore.gasPrices.instant.toString(), 'gwei');
+    const standardGasPrice = Web3Utils.toWei(this.gasPriceStore.gasPrices.fast.toString(), 'gwei');
     const currentFeeInWei = Web3Utils.toWei(this.currentFee);
     const tx = new BN(standardGasPrice).times(new BN('6000000'))
     const txFeeMiners = tx.times(new BN(this.totalNumberTx))

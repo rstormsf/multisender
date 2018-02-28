@@ -7,7 +7,21 @@ import swal from 'sweetalert';
 const Transaction = (tx) => {
   const {name, hash, status} = tx.tx;
   console.log(tx)
-  const classname = status === 'mined' ? 'table-td_check-hash_done' : 'table-td_check-hash_wait'
+  let classname;
+  switch(status){
+    case 'mined':
+      classname = 'table-td_check-hash_done'
+      break;
+    case 'error':
+      classname = 'table-td_check-hash_error'
+      break;
+    case 'pending':
+      classname = 'table-td_check-hash_wait'
+      break;
+    default:
+      classname = 'table-td_check-hash_wait'
+  }
+  // const classname = status === 'mined' ? 'table-td_check-hash_done' : 'table-td_check-hash_wait'
   return (
     <div className="table-tr">
       <div className={`table-td table-td_check-hash ${classname}`}>

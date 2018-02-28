@@ -9,6 +9,8 @@ import { inject, observer } from "mobx-react";
 import swal from 'sweetalert';
 import generateElement from '../generateElement'
 import Example from './example'
+import { PulseLoader} from 'react-spinners';
+
 const ownInput = ({ error, isChanged, isUsed, ...props }) => (
   <div>
     {isChanged && isUsed && error}
@@ -44,6 +46,7 @@ export class FirstStep extends React.Component {
   constructor(props){
     super(props);
     this.tokenStore = props.UiStore.tokenStore;
+    this.web3Store = props.UiStore.web3Store;
     this.onTokenAddress = this.onTokenAddress.bind(this);
     this.onDecimalsChange = this.onDecimalsChange.bind(this);
     this.onJsonChange = this.onJsonChange.bind(this);
@@ -52,11 +55,14 @@ export class FirstStep extends React.Component {
       json: []
     }
   }
+  componentDidMount() {
+    
+  }
   async onTokenAddress(e){
     const address = e.target.value;
     if (Web3Utils.isAddress(address)) {
-      this.tokenStore.setTokenAddress(address);
-      const decimals = await this.tokenStore.getDecimals(address);
+        this.tokenStore.setTokenAddress(address);
+      // const decimals = await this.tokenStore.getDecimals(address);
     }
   }
   onDecimalsChange(e) {
@@ -82,9 +88,22 @@ export class FirstStep extends React.Component {
     this.props.history.push('/3')
   }
   render () {
+    if(this.tokenStore.errors.length > 0){
+      swal("Error!", this.tokenStore.errors.toString(), 'error')
+    }
+    if(this.web3Store.errors.length > 0){
+      swal("Error!", this.web3Store.errors.toString(), 'error')
+    }
     return (
       <div className="container container_bg">
+          
         <div className="content">
+          <div className='sweet-loading'>
+          <PulseLoader
+            color={'#123abc'} 
+            loading={this.web3Store.loading} 
+            />
+          </div>
           <h1 className="title"><strong>Welcome to Token</strong> MultiSender</h1>
           <p className="description">
             Please provide Token Address, JSON file with addresses <br />
@@ -94,15 +113,16 @@ export class FirstStep extends React.Component {
             <div className="form-inline">
               <div className="form-inline-i form-inline-i_token-address">
                 <label htmlFor="token-address" className="label">Token Address</label>
-                <Input validations={[required, isAddress]} onChange={this.onTokenAddress} type="text" className="input" id="token-address"/>
+                <Input disabled={this.web3Store.loading} validations={[required, isAddress]} onChange={this.onTokenAddress} type="text" className="input" id="token-address"/>
               </div>
               <div className="form-inline-i form-inline-i_token-decimals">
                 <label htmlFor="token-decimals" className="label">Token Decimals</label>
-                <Input type="number" validations={[required]} onChange={this.onDecimalsChange} value={this.tokenStore.decimals} className="input" id="token-decimals"/>
+                <Input disabled={this.web3Store.loading} type="number" validations={[required]} onChange={this.onDecimalsChange} value={this.tokenStore.decimals} className="input" id="token-decimals"/>
               </div>
             </div>
             <label htmlFor="addresses-with-balances" className="label">Addresses with Balances</label>
             <Textarea 
+              disabled={this.web3Store.loading}
               data-gram 
               validations={[required, isJson]}
               placeholder={`Example: ${JSON.stringify(Example)}`}

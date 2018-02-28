@@ -90,7 +90,7 @@ export class ThirdStep extends React.Component {
                 <div className="send-info-i">
                   <p>Instant Gas Price</p>
                   <p className="send-info-amount">
-                  {this.gasPriceStore.gasPrices.instant} gwei
+                  {this.gasPriceStore.gasPrices.fast} gwei
                   </p>
                 </div>
               </div>
