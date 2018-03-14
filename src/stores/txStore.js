@@ -1,13 +1,16 @@
-import { action, observable, computed } from "mobx";
+import { action, observable, computed, autorun, toJS } from "mobx";
 import Web3Utils from 'web3-utils'
 import ERC20ABI from "../abis/ERC20ABI"
 import MultiSenderAbi from "../abis/StormMultisender"
 import Web3 from "web3";
+import { observer } from "mobx-react";
 const BN = require('bignumber.js');
+
 
 class TxStore {
   @observable txs = []
   txHashToIndex = {}
+  @observable approval = '';
   constructor(rootStore) {
     this.tokenStore = rootStore.tokenStore
     this.web3Store = rootStore.web3Store
@@ -17,33 +20,46 @@ class TxStore {
   @action
   async doSend(){
     if(new BN(this.tokenStore.totalBalance).gt(new BN(this.tokenStore.allowance))){
-      await this._approve()
+      this._approve();
+      const disposer = autorun(() => {
+        if(this.approval){
+          const index = this.txHashToIndex[this.approval];
+          console.log('checking autorun', index, this.approval, this.txHashToIndex, toJS(this.txs))
+          if(this.txs[index] && this.txs[index].status === 'mined'){
+            console.log('lets GO!')
+            setTimeout(() => {
+              this._multisend({slice: this.tokenStore.totalNumberTx, addPerTx: this.tokenStore.arrayLimit})
+            }, 5000)
+            disposer()
+          }
+        }
+      })
+    } else {
+      this._multisend({slice: this.tokenStore.totalNumberTx, addPerTx: this.tokenStore.arrayLimit})
     }
-    this._multisend({slice: this.tokenStore.totalNumberTx, addPerTx: this.tokenStore.arrayLimit})
-    console.log('doSend')
+    // console.log('doSend')
   }
 
   async _approve(){
     const index = this.txs.length;
     const web3 = this.web3Store.web3;
     const token = new web3.eth.Contract(ERC20ABI, this.tokenStore.tokenAddress);
-    return token.methods['approve(address,uint256)'](this.tokenStore.proxyMultiSenderAddress, this.tokenStore.totalBalanceWithDecimals)
-    .send({from: this.web3Store.defaultAccount, gasPrice: this.gasPriceStore.standardInHex})
-    // .on('receipt', async (receipt) => {
-    //   this.txs[index].status = `mined`
-    //   console.log('receipt', receipt)
-      
-    // })
-    .on('transactionHash', (hash) => {
-      this.txHashToIndex[hash] = index;
-      this.txs[index] = {status: 'pending', name: `MultiSender Approval to spend ${this.tokenStore.totalBalance} ${this.tokenStore.tokenSymbol}`, hash}
-      console.log('txHash',hash)
-      this.getTxReceipt(hash)
-
-    })
-    .on('error', (error) => {
-      console.error(error)
-    })
+    try{
+      return token.methods['approve(address,uint256)'](this.tokenStore.proxyMultiSenderAddress, this.tokenStore.totalBalanceWithDecimals)
+      .send({from: this.web3Store.defaultAccount, gasPrice: this.gasPriceStore.standardInHex})
+      .on('transactionHash', (hash) => {
+        this.approval = hash
+        this.txHashToIndex[hash] = index;
+        this.txs[index] = {status: 'pending', name: `MultiSender Approval to spend ${this.tokenStore.totalBalance} ${this.tokenStore.tokenSymbol}`, hash}
+        this.getTxReceipt(hash)
+  
+      })
+      .on('error', (error) => {
+        console.error(error)
+      })
+    } catch (e){
+      console.error(e)
+    }
     
   }
 
@@ -74,14 +90,9 @@ class TxStore {
         gas: Web3Utils.toHex(gas),
         value: currentFee
       })
-      // .on('receipt', async (receipt) => {
-      //   const index = this.txHashToIndex[receipt.transactionHash]
-      //   this.txs[index].status = `mined`
-      //   console.log(receipt)
-        
-      // })
+
       .on('transactionHash', (hash) => {
-        console.log('txHash',hash)
+        // console.log('txHash',hash)
         this.txHashToIndex[hash] = this.txs.length
         this.txs.push({status: 'pending', name: `Sending Batch #${this.txs.length} ${this.tokenStore.tokenSymbol}\n
           From ${addresses_to_send[0]} to: ${addresses_to_send[addresses_to_send.length-1]}
@@ -106,7 +117,6 @@ class TxStore {
   async getTxReceipt(hash){
     const web3 = this.web3Store.web3;
     web3.eth.getTransaction(hash, (error, res) => {
-      console.log(hash, res)
       if(res && res.blockNumber){
         this.getTxStatus(hash)
       } else {
@@ -122,9 +132,7 @@ class TxStore {
     console.log('GET TX STATUS', hash)
     const web3 = this.web3Store.web3;
     web3.eth.getTransactionReceipt(hash, (error, res) => {
-      console.log(hash, res)
       if(res && res.blockNumber){
-        console.log('receipt', res)
         if(res.status === '0x1'){
           const index = this.txHashToIndex[hash]
           this.txs[index].status = `mined`
