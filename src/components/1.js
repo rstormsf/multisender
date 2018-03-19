@@ -8,8 +8,11 @@ import { form, control, button } from 'react-validation';
 import { inject, observer } from "mobx-react";
 import swal from 'sweetalert';
 import generateElement from '../generateElement'
-import Example from './example'
+import Example from './example.json'
+import ExampleCSV from './example.csv'
 import { PulseLoader} from 'react-spinners';
+import {RadioGroup, Radio} from 'react-radio-group';
+import csvtojson from 'csvtojson'
 
 const ownInput = ({ error, isChanged, isUsed, ...props }) => (
   <div>
@@ -52,17 +55,29 @@ export class FirstStep extends React.Component {
     this.onJsonChange = this.onJsonChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.state ={
-      json: []
+      json: [],
+      format: 'json',
+      placeholder: JSON.stringify(Example)
     }
-  }
-  componentDidMount() {
-    
+    this.onSelectFormat = this.onSelectFormat.bind(this)
+    this.onParse = this.onParse.bind(this)
   }
   async onTokenAddress(e){
     const address = e.target.value;
     if (Web3Utils.isAddress(address)) {
         this.tokenStore.setTokenAddress(address);
-      // const decimals = await this.tokenStore.getDecimals(address);
+    }
+  }
+  onSelectFormat(newFormat){
+    if(newFormat === 'csv'){
+      this.setState({format: newFormat, placeholder: `
+0xCBA5018De6b2b6F89d84A1F5A68953f07554765e,12
+0xa6Bf70bd230867c870eF13631D7EFf1AE8Ab85c9,1123.45645
+0x00b5F428905DEA1a67940093fFeaCeee58cA91Ae,1.049
+0x00fC79F38bAf0dE21E1fee5AC4648Bc885c1d774,14546
+  `})
+    } else {
+      this.setState({format: newFormat, placeholder: JSON.stringify(Example)})
     }
   }
   onDecimalsChange(e) {
@@ -80,6 +95,44 @@ export class FirstStep extends React.Component {
         content: generateElement(`${error} Please visit <a target="_blank" href="https://jsonlint.com">JsonLint.com</a>`),
         icon: "error",
       })
+    }
+  }
+
+  onCsvChange(e){
+    let addresses = [];
+    console.log(e.target.value)
+    csvtojson({noheader:true})
+    .fromString(e.target.value)
+      .on('csv',(csv)=>{
+        let el = {};
+        if(csv.length === 2){
+          Object.defineProperty(el, csv[0], {
+            value: csv[1],
+            writable: true,
+            configurable: true,
+            enumerable: true,
+          });
+          addresses.push(el)
+        } 
+      })
+      .on('end', () => {
+        try {
+          this.tokenStore.setJsonAddresses(addresses)
+        } catch(e) {
+          console.error(e)
+          swal({
+            content: "Your CSV is invalid",
+            icon: "error",
+          })
+        }
+      })
+  }
+
+  onParse(e){
+    if(this.state.format === 'json') {
+      this.onJsonChange(e)
+    } else {
+      this.onCsvChange(e)
     }
   }
   onSubmit(e){
@@ -120,13 +173,19 @@ export class FirstStep extends React.Component {
                 <Input disabled={this.web3Store.loading} type="number" validations={[required]} onChange={this.onDecimalsChange} value={this.tokenStore.decimals} className="input" id="token-decimals"/>
               </div>
             </div>
-            <label htmlFor="addresses-with-balances" className="label">Addresses with Balances</label>
+            <label htmlFor="addresses-with-balances" className="label">Addresses with Balances in
+            <RadioGroup name="format" selectedValue={this.state.format} onChange={this.onSelectFormat}>
+              <Radio value="json" />JSON
+              <Radio value="csv" />CSV
+            </RadioGroup>
+            
+            </label>
             <Textarea 
               disabled={this.web3Store.loading}
               data-gram 
-              validations={[required, isJson]}
-              placeholder={`Example: ${JSON.stringify(Example)}`}
-              onBlur={this.onJsonChange} id="addresses-with-balances" className="textarea"></Textarea>
+              validations={[required]}
+              placeholder={`Example: ${this.state.placeholder}`}
+              onBlur={this.onParse} id="addresses-with-balances" className="textarea"></Textarea>
             <Button className="button button_next">Next</Button>
           </Form>
         </div>
