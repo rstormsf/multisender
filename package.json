@@ -20,6 +20,7 @@
     "react-radio-group": "^3.0.2",
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.1.1",
+    "react-select": "^1.2.1",
     "react-spinners": "^0.2.6",
     "react-validation": "^3.0.7",
     "splash-screen": "^4.0.1",

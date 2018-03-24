@@ -43,15 +43,15 @@
 
   &-inline {
     @extend %flex-between;
-    align-items: flex-end;
+    align-items: flex-start;
 
     &-i {
       &_token-address {
-        width: 65%;
+        width: 80%;
       }
 
       &_token-decimals {
-        width: 30%;
+        width: 15%;
       }
 
       &_balance {
@@ -162,4 +162,20 @@
     background-size: 18px 18px;
     background-position: center center;
   }
+}
+// .Select-option,.Select-control, .Select.Select--single.has-value.is-focused.is-clearable > .Select-control, .Select--single > .Select-value  {
+//   background-color: #213443;
+//   color: #fff;
+//   border: 1px solid #95d5ff;
+//   // border: 1px solid #95d5ff;
+// }
+// .Select-placeholder, .Select--single > .Select-control .Select-value {
+//   color: #fff;
+// }
+// .Select.has-value.Select--single > .Select-control .Select-value .Select-value-label, .Select.has-value.is-pseudo-focused.Select--single > .Select-control .Select-value .Select-value-label {
+//   color: #fff;
+// }
+
+#token-address {
+  color: #fff;
 }

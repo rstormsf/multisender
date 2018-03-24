@@ -11,31 +11,37 @@ let getWeb3 = () => {
         // Use Mist/MetaMask's provider.
         web3 = new window.Web3(web3.currentProvider)
         web3.version.getNetwork((err, netId) => {
-          let netIdName;
+          let netIdName, trustApiName;
           console.log('netId', netId);
           switch (netId) {
             case "1":
               netIdName = 'Foundation'
+              trustApiName = 'api'
               console.log('This is Foundation', netId)
               break;
             case "3":
               netIdName = 'Ropsten'
+              trustApiName = 'ropsten'
               console.log('This is Ropsten', netId)
               break;
             case "4":
               netIdName = 'Rinkeby'
+              trustApiName = 'rinkeby'
               console.log('This is Rinkeby', netId)
               break;
             case "42":
               netIdName = 'Kovan'
+              trustApiName = 'kovan'
               console.log('This is Kovan', netId)
               break;
             case "99":
               netIdName = 'POA Core'
+              trustApiName = 'poa'
               console.log('This is Core', netId)
               break;
             case "77":
               netIdName = 'POA Sokol'
+              trustApiName = 'https://trust-sokol.herokuapp.com'
               console.log('This is Sokol', netId)
               break;
             default:
@@ -52,7 +58,8 @@ let getWeb3 = () => {
             netIdName,
             netId,
             injectedWeb3: true,
-            defaultAccount
+            defaultAccount,
+            trustApiName
           }
           resolve(results)
         })

@@ -13,6 +13,9 @@ import ExampleCSV from './example.csv'
 import { PulseLoader} from 'react-spinners';
 import {RadioGroup, Radio} from 'react-radio-group';
 import csvtojson from 'csvtojson'
+import Select from 'react-select'
+import '../assets/stylesheets/react-select.min.css';
+
 
 const ownInput = ({ error, isChanged, isUsed, ...props }) => (
   <div>
@@ -57,15 +60,21 @@ export class FirstStep extends React.Component {
     this.state ={
       json: [],
       format: 'json',
-      placeholder: JSON.stringify(Example)
+      placeholder: JSON.stringify(Example),
+      tokenAddress: {label: '', value: null}
     }
     this.onSelectFormat = this.onSelectFormat.bind(this)
     this.onParse = this.onParse.bind(this)
   }
   async onTokenAddress(e){
-    const address = e.target.value;
+    if(!e){
+      this.setState({tokenAddress: {label: '', value: ''}})
+      return
+    }
+    const address = e.value;
     if (Web3Utils.isAddress(address)) {
         this.tokenStore.setTokenAddress(address);
+        this.setState({tokenAddress: {label: e.label, value: e.value}})
     }
   }
   onSelectFormat(newFormat){
@@ -159,17 +168,29 @@ export class FirstStep extends React.Component {
           </div>
           <h1 className="title"><strong>Welcome to Token</strong> MultiSender</h1>
           <p className="description">
-            Please provide Token Address, JSON file with addresses <br />
-            This Dapp supports Mainnet, POA-Core, POA-sokol, Ropsten, Rinkeby, Kovan
+            Please provide Token Address, JSON/CSV file with addresses <br />
+            This Dapp supports Mainnet, POA-Core, POA-sokol, Ropsten, Rinkeby, Kovan <br/>
+            Please wait while all your token balances are loaded
           </p>
           <Form className="form" onSubmit={this.onSubmit}>
             <div className="form-inline">
               <div className="form-inline-i form-inline-i_token-address">
                 <label htmlFor="token-address" className="label">Token Address</label>
-                <Input disabled={this.web3Store.loading} validations={[required, isAddress]} onChange={this.onTokenAddress} type="text" className="input" id="token-address"/>
+                <Select.Creatable
+              
+              isLoading={this.web3Store.loading}
+              name="form-field-name"
+              id="token-address"
+              value={this.state.tokenAddress}
+              onChange={this.onTokenAddress}
+              loadingPlaceholder="Loading your token addresses..."
+              placeholder="Please select a token or input the address"
+              options={this.web3Store.userTokens.slice()}
+            />
+                
               </div>
               <div className="form-inline-i form-inline-i_token-decimals">
-                <label htmlFor="token-decimals" className="label">Token Decimals</label>
+                <label htmlFor="token-decimals" className="label">Decimals</label>
                 <Input disabled={this.web3Store.loading} type="number" validations={[required]} onChange={this.onDecimalsChange} value={this.tokenStore.decimals} className="input" id="token-decimals"/>
               </div>
             </div>
