@@ -1,4 +1,7 @@
 .socials {
+  @media (max-width: $mobile--width) {
+    display: none;
+  }
   font-size: 0;
 
   &-i {
