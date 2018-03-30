@@ -1,27 +1,24 @@
 ![Demo](demo.gif)
 # Problem:
-In ethereum network, additional tools are required in order to send
-a lot of ERC20 token transfers.
-Many people still do it manually: one transaction  at a time. Hence wasting a lot of Ether on tx fees and manual processing.
+Previously in Ethereum Network, additional tools were required in order to transfer many ERC20 tokens at once.
+Many people still do this manually, one transaction at a time. This process is exceedingly expensive wasting large amounts of Ethereum on transaction fees and manual processing.
 
 # Solution:
-This Dapp allows to send thousands of token transfer in very effecient way by batching them by 175 token transfers per eth transaction.
-It also saves a lot of human time because it automatically generates transactions to metamask.
-This tool also allows to maintain security of your account by delegating the trust of your private keys to a secure metamask wallet.
+This Dapp allows a user to send thousands of token transfers in a very effecient way by batching them in groups of 175 token transfers per Ethereum transaction. This automation saves time by automatically generating transactions to MetaMask. Finally, this tool allows a user to maintain security of their account by delegating the trust of their private keys to a secure MetaMask wallet.
 
 # How to use:
-1. Install [Metamask](https://metamask.io) if you haven't done it already.
-2. Make sure you have an account in metamask which has some token balances.
-3. Make sure your metamask pointed to a chain that you would like to use.
-4. Make sure your metamask account is unlocked.
+1. Install [Metamask](https://metamask.io).
+2. Make sure you have an account in MetaMask which has a token balance.
+3. Make sure your MetaMask is pointed to the network that you would like to use.
+4. Make sure your MetaMask account is unlocked.
 5. Go to https://poanetwork.github.io/multisender/#/
-6. Wait for full page to load
-7. Select a token from dropdown that you would like to send
-8. Provide either JSON or CSV text in the textarea(See Example below)
-9. Click Next
-10. If everything looks good, click next
-11. Wait for metamask to generate approval transaction
-12. Once approval transaction is mined, metamask will generate as much transactions as needed for your token transfers(175 addresses per tx)
+6. Wait for the full page to load.
+7. Select a token from the dropdown that you would like to send.
+8. Provide either JSON or CSV text in the textarea (see example below).
+9. Click next.
+10. If everything looks good, click next once again.
+11. Wait for MetaMask to generate an approval transaction.
+12. Once the approval transaction is mined, MetaMask will generate as many transactions as needed for your token transfers (175 addresses per tx).
 13. Done!
 
 You can test this tool on any test network, if you want to make sure that
@@ -58,12 +55,12 @@ https://kovan.etherscan.io/tx/0x755b84a8a61fd82c1410f6bbbb452c94ddf12fac5b1daaa1
 
 # Disclaimer
 This tool is not affiliated with https://poa.network
-It's personal project of Roman Storm
+This is a personal project of Roman Storm.
 
-I am not responsible for any loss: MultiSender, and some of the underlying JavaScript libraries and Ethereum tools I use are under active development. While I have thoroughly tested the website and smart-contract, there is always the possibility something unexpected happens resulting in losses of ether or/and tokens.
+He is not responsible for any loss from transactions derived by MultiSender.  Some of the underlying JavaScript libraries and Ethereum tools that were used are under active development. The website and smart contract has been thoroughly tested, there is always the possibility something unexpected happens resulting in losses of Ethereum and/or tokens.
 
 Any ERC20 tokens you transfer to the Multisender will be sent out to the addresses that you provided.
 
-The smart contract source code could be audited by anyone in this repository
+The smart contract source code can be audited by anyone in this repository.
 
-I encourage you to assess its security before using Mutlisender Dapp.
+I encourage you to assess its security before using the Mutlisender Dapp.
