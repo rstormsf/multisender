@@ -83,11 +83,12 @@ class TxStore {
           value: currentFee,
           to: proxyMultiSenderAddress
       })
+      console.log('gas', gas)
       let tx = multisender.methods.multisendToken(token_address, addresses_to_send, balances_to_send)
       .send({
         from: this.web3Store.defaultAccount,
         gasPrice: this.gasPriceStore.standardInHex,
-        gas: Web3Utils.toHex(gas),
+        gas: Web3Utils.toHex(gas + 150000),
         value: currentFee
       })
 
