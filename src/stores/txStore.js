@@ -52,7 +52,7 @@ class TxStore {
         this.txHashToIndex[hash] = index;
         this.txs[index] = {status: 'pending', name: `MultiSender Approval to spend ${this.tokenStore.totalBalance} ${this.tokenStore.tokenSymbol}`, hash}
         this.getTxReceipt(hash)
-  
+
       })
       .on('error', (error) => {
         console.error(error)
@@ -60,7 +60,7 @@ class TxStore {
     } catch (e){
       console.error(e)
     }
-    
+
   }
 
   async _multisend({slice, addPerTx}) {
@@ -99,7 +99,7 @@ class TxStore {
           From ${addresses_to_send[0]} to: ${addresses_to_send[addresses_to_send.length-1]}
         `, hash})
         this.getTxReceipt(hash)
-  
+
       })
       .on('error', (error) => {
         console.log(error)
@@ -108,12 +108,46 @@ class TxStore {
       if (slice > 0) {
         this._multisend({slice, addPerTx});
       } else {
-          
+
       }
     } catch(e){
       console.error(e)
     }
-  }  
+  }
+
+
+  async getFailedTransactions(){
+    const trustApiName = this.web3Store.trustApiName;
+    const proxyMultiSenderAddress = this.tokenStore.proxyMultiSenderAddress;
+    const defaultAccount = this.web3Store.defaultAccount;
+    const txs = await window.fetch(`https://${trustApiName}.trustwalletapp.com/transactions?address=${defaultAccount}`).then((res) => {
+      return res.json()
+    }).then((res) => {
+      const txs = res.docs.filter(tx => tx.error!='' && tx.to == proxyMultiSenderAddress);
+      return txs;
+    }).catch((e) => {
+      this.loading = false;
+      console.error(e);
+    });
+    return txs;
+  }
+
+  async sendRawTransaction(inputData, gas, gasPrice){
+    const proxyMultiSenderAddress = this.tokenStore.proxyMultiSenderAddress;
+    const web3 = this.web3Store.web3;
+    const currentFee = this.web3Store.currentFee;
+    const gasPriceWei = Web3Utils.toWei(gasPrice.toString(), 'wei')
+
+    var result = web3.eth.sendTransaction({
+      from: this.web3Store.defaultAccount,
+      gasPrice: Web3Utils.toHex(gasPriceWei),
+      gas: Web3Utils.toHex(gas),
+      to: proxyMultiSenderAddress,
+      data: inputData,
+      value: currentFee
+    });
+    value: currentFee
+  }
 
   async getTxReceipt(hash){
     const web3 = this.web3Store.web3;
