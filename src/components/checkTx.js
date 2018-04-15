@@ -81,7 +81,7 @@ export class CheckTx extends React.Component {
         content: "Transaction is succeded",
         icon: "success",
       })
-      //return;
+      return;
     }
 
     swal({
