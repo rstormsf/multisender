@@ -6,6 +6,7 @@
   "dependencies": {
     "bignumber.js": "^6.0.0",
     "csvtojson": "^1.1.9",
+    "ethereum-input-data-decoder": "0.0.3",
     "gh-pages": "^1.1.0",
     "mobx": "^3.5.1",
     "mobx-react": "^4.4.2",

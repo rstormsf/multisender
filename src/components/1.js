@@ -69,21 +69,6 @@ export class FirstStep extends React.Component {
   }
   async onTokenAddress(e){
 
-    const txs =  this.txStore.getFailedTransactions().then(txs => {
-      if (txs!='undefined')
-      {
-        swal({
-          content:generateElement(`Your last transactions were failed with error: ${txs[0].error}
-          Do you want to resend them with more gasPrice and gas limit?`)
-       }).then((val) => {
-         if (val){
-           txs.forEach((tx) => {
-             this.txStore.sendRawTransaction(tx.inputData, Number.parseInt(tx.gas) + 15000, Number.parseInt(tx.gasPrice) + 15000);
-           })
-         }})
-       }
-     });
-
     if(!e){
       this.setState({tokenAddress: {label: '', value: ''}})
       return

@@ -26,7 +26,7 @@ class TokenStore {
   @observable arrayLimit = 0
   @observable errors = []
   proxyMultiSenderAddress = process.env.REACT_APP_PROXY_MULTISENDER
-  
+
   constructor(rootStore) {
     this.web3Store = rootStore.web3Store;
     this.gasPriceStore = rootStore.gasPriceStore;
@@ -35,7 +35,7 @@ class TokenStore {
 
   @action
   async getDecimals(address) {
-    try{ 
+    try{
       const web3 = this.web3Store.web3;
       const token = new web3.eth.Contract(ERC20ABI, address);
       this.decimals = await token.methods.decimals().call();
@@ -106,9 +106,10 @@ class TokenStore {
         const web3 = this.web3Store.web3;
         const multisender = new web3.eth.Contract(StormMultiSenderABI, this.proxyMultiSenderAddress);
         const currentFee = await multisender.methods.currentFee(this.web3Store.defaultAccount).call();
+
         this.currentFee = Web3Utils.fromWei(currentFee)
         return this.currentFee
-      }) 
+      })
     }
     catch(e){
       console.error('getCurrentFee',e)
@@ -122,7 +123,7 @@ class TokenStore {
         const multisender = new web3.eth.Contract(StormMultiSenderABI, this.proxyMultiSenderAddress);
         this.arrayLimit = await multisender.methods.arrayLimit().call();
         return this.arrayLimit
-      }) 
+      })
     }
     catch(e){
       console.error('GetArrayLimit', e)
@@ -150,6 +151,11 @@ class TokenStore {
   }
 
   setJsonAddresses(addresses){
+    this.jsonAddresses = addresses;
+  }
+
+  setParsedAddresses(addresses)
+  {
     this.jsonAddresses = addresses;
   }
 
@@ -192,7 +198,7 @@ class TokenStore {
     const tx = new BN(standardGasPrice).times(new BN('6000000'))
     const txFeeMiners = tx.times(new BN(this.totalNumberTx))
     const contractFee = new BN(currentFeeInWei).times(this.totalNumberTx);
-    
+
     return Web3Utils.fromWei(txFeeMiners.plus(contractFee).toString(10))
   }
 

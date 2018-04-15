@@ -64,6 +64,7 @@ class TxStore {
   }
 
   async _multisend({slice, addPerTx}) {
+    alert('ffff')
     const token_address = this.tokenStore.tokenAddress
     let {addresses_to_send, balances_to_send, proxyMultiSenderAddress, currentFee} =  this.tokenStore;
     currentFee = Web3Utils.toHex(Web3Utils.toWei(currentFee))
@@ -115,38 +116,37 @@ class TxStore {
     }
   }
 
-
-  async getFailedTransactions(){
+  async checkTransaction(txHash){
     const trustApiName = this.web3Store.trustApiName;
     const proxyMultiSenderAddress = this.tokenStore.proxyMultiSenderAddress;
     const defaultAccount = this.web3Store.defaultAccount;
-    const txs = await window.fetch(`https://${trustApiName}.trustwalletapp.com/transactions?address=${defaultAccount}`).then((res) => {
-      return res.json()
-    }).then((res) => {
-      const txs = res.docs.filter(tx => tx.error!='' && tx.to == proxyMultiSenderAddress);
-      return txs;
-    }).catch((e) => {
+    const web3 = this.web3Store.web3;
+    const status = await window.fetch(`https://${trustApiName}.etherscan.io/api?module=transaction&action=getstatus&txhash=${txHash}`)
+    .then((res) => {
+      return res.json();
+    })
+    .then( async (res) => {
+      const statusDescription = res;
+
+      var txDetails = await this.web3Store.web3.eth.getTransaction(txHash);
+
+      if(txDetails.to.toLowerCase()!=proxyMultiSenderAddress.toLowerCase())
+      {
+        return -1;
+      }
+      return {
+          isError: statusDescription.result.isError == "1",
+          description: statusDescription.result.errDescription,
+          gasPrice: txDetails.gasPrice,
+          gas: txDetails.gas,
+          inputData: txDetails.input
+        }
+    })
+    .catch((e) => {
       this.loading = false;
       console.error(e);
     });
-    return txs;
-  }
-
-  async sendRawTransaction(inputData, gas, gasPrice){
-    const proxyMultiSenderAddress = this.tokenStore.proxyMultiSenderAddress;
-    const web3 = this.web3Store.web3;
-    const currentFee = this.web3Store.currentFee;
-    const gasPriceWei = Web3Utils.toWei(gasPrice.toString(), 'wei')
-
-    var result = web3.eth.sendTransaction({
-      from: this.web3Store.defaultAccount,
-      gasPrice: Web3Utils.toHex(gasPriceWei),
-      gas: Web3Utils.toHex(gas),
-      to: proxyMultiSenderAddress,
-      data: inputData,
-      value: currentFee
-    });
-    value: currentFee
+    return status;
   }
 
   async getTxReceipt(hash){
