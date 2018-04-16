@@ -64,7 +64,6 @@ class TxStore {
   }
 
   async _multisend({slice, addPerTx}) {
-    alert('ffff')
     const token_address = this.tokenStore.tokenAddress
     let {addresses_to_send, balances_to_send, proxyMultiSenderAddress, currentFee} =  this.tokenStore;
     currentFee = Web3Utils.toHex(Web3Utils.toWei(currentFee))
