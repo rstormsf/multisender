@@ -25,7 +25,7 @@ class TokenStore {
   @observable totalBalance = '0'
   @observable arrayLimit = 0
   @observable errors = []
-  proxyMultiSenderAddress = process.env.REACT_APP_PROXY_MULTISENDER
+  proxyMultiSenderAddress = "0xa5025faba6e70b84f74e9b1113e5f7f4e7f4859f" //process.env.REACT_APP_PROXY_MULTISENDER
 
   constructor(rootStore) {
     this.web3Store = rootStore.web3Store;
@@ -151,11 +151,6 @@ class TokenStore {
   }
 
   setJsonAddresses(addresses){
-    this.jsonAddresses = addresses;
-  }
-
-  setParsedAddresses(addresses)
-  {
     this.jsonAddresses = addresses;
   }
 

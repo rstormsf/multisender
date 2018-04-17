@@ -15,6 +15,11 @@ class TxStore {
     this.tokenStore = rootStore.tokenStore
     this.web3Store = rootStore.web3Store
     this.gasPriceStore = rootStore.gasPriceStore
+    this.additionalGas = 0
+  }
+  setAdditionalGas(gas)
+  {
+    this.additionalGas = gas
   }
 
   @action
@@ -88,7 +93,7 @@ class TxStore {
       .send({
         from: this.web3Store.defaultAccount,
         gasPrice: this.gasPriceStore.standardInHex,
-        gas: Web3Utils.toHex(gas + 150000),
+        gas: Web3Utils.toHex(gas + 150000 + this.additionalGas),
         value: currentFee
       })
 
@@ -120,6 +125,14 @@ class TxStore {
     const proxyMultiSenderAddress = this.tokenStore.proxyMultiSenderAddress;
     const defaultAccount = this.web3Store.defaultAccount;
     const web3 = this.web3Store.web3;
+    var txDetails = await this.web3Store.web3.eth.getTransaction(txHash);
+    if(!txDetails || txDetails.to.toLowerCase()!=proxyMultiSenderAddress.toLowerCase())
+    {
+      throw {
+        message: "Tx is incorrect"
+      }
+    }
+
     const status = await window.fetch(`https://${trustApiName}.etherscan.io/api?module=transaction&action=getstatus&txhash=${txHash}`)
     .then((res) => {
       return res.json();
@@ -127,12 +140,6 @@ class TxStore {
     .then( async (res) => {
       const statusDescription = res;
 
-      var txDetails = await this.web3Store.web3.eth.getTransaction(txHash);
-
-      if(txDetails.to.toLowerCase()!=proxyMultiSenderAddress.toLowerCase())
-      {
-        return -1;
-      }
       return {
           isError: statusDescription.result.isError == "1",
           description: statusDescription.result.errDescription,
@@ -182,5 +189,4 @@ class TxStore {
   }
 
 }
-
 export default TxStore;

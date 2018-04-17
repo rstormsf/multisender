@@ -1,18 +1,11 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import Web3Utils from 'web3-utils';
 import Form from 'react-validation/build/form';
-import Textarea from 'react-validation/build/textarea';
 import Button from 'react-validation/build/button';
 import { form, control, button } from 'react-validation';
 import { inject, observer } from "mobx-react";
 import swal from 'sweetalert';
-import generateElement from '../generateElement'
-import Example from './example.json'
-import ExampleCSV from './example.csv'
 import { PulseLoader} from 'react-spinners';
-import {RadioGroup, Radio} from 'react-radio-group';
-import csvtojson from 'csvtojson'
 import Select from 'react-select'
 import '../assets/stylesheets/react-select.min.css';
 import StormMultiSenderABI from '../abis/StormMultisender'
@@ -28,28 +21,6 @@ const ownInput = ({ error, isChanged, isUsed, ...props }) => (
 );
 const Input = control(ownInput);
 
-const required = (value) => {
-  if (!value.toString().trim().length) {
-    return <span className="error">required</span>;
-  }
-};
-
-const isAddress = (value) => {
-  if (!Web3Utils.isAddress(value)) {
-    return <span className="error">Token address is invalid</span>;
-  }
-};
-const InvalidJSON = <div>Your JSON is invalid, please visit <a href="https://jsonlint.com/" target="_blank">Online Json Validator</a></div>
-
-const isJson = (value) => {
-  try {
-    JSON.parse(value)
-  } catch(e) {
-    return InvalidJSON
-  }
-};
-
-
 @inject("UiStore")
 @observer
 export class CheckTx extends React.Component {
@@ -62,32 +33,27 @@ export class CheckTx extends React.Component {
     this.onSubmit = this.onSubmit.bind(this);
     this.addresses = []
     this.tokenAddress = '';
-    this.txFailed = true;
+    this.txFailed = false;
   }
   async onTxHash(e){
 
-    const status =  await this.txStore.checkTransaction(e.value);
-    if (status == -1)
-    {
-      swal({
-        content: "Your tx hash is invalid",
-        icon: "error",
-      })
-      return;
-    }
-    if (!status.isError)
-    {
-      swal({
-        content: "Transaction is succeded",
-        icon: "success",
-      })
+    let status = {}
+
+    try {
+      status = await this.txStore.checkTransaction(e.value);
+    } catch (e) {
+      swal("Error!", e.message, "error")
       return;
     }
 
-    swal({
-      content: status.description,
-      icon: "error",
-    })
+    if (!status.isError)
+    {
+      swal("Success", "Transaction is succeded", "success")
+      return;
+    }
+
+    this.txFailed = true;
+    swal("Error!", status.description, "error")
 
     const inputData = decoder.decodeData(status.inputData);
     const tokenAddress = `0x${inputData.inputs[0]}`;
@@ -96,25 +62,30 @@ export class CheckTx extends React.Component {
     const balances = inputData.inputs[2];
     let bindex = 0;
 
+    await this.tokenStore.setTokenAddress(tokenAddress);
+    const decimal = this.tokenStore.multiplier
+
     recAddresses.forEach((address)=>{
       const addr = {};
-      addr[`0x${address}`] = Web3Utils.BN(balances[bindex]);
-      addresses.push(addr);
-      bindex++;
+      addr[`0x${address}`] = Web3Utils.BN(balances[bindex]).div(decimal).toString(10)
+      addresses.push(addr)
+      bindex++
     });
     await this.tokenStore.setJsonAddresses(addresses);
-    await this.tokenStore.setTokenAddress(tokenAddress);
+
     this.txFailed = true;
   }
   onSubmit(e){
     e.preventDefault()
-
-    this.tokenStore.setDecimals(0)
-    this.tokenStore.parseAddresses()
-    this.props.history.push('/3')
+    if (this.txFailed)
+    {
+      this.txStore.setAdditionalGas(5000)
+      this.tokenStore.parseAddresses()
+      this.props.history.push('/3')
+    }
   }
   render () {
-    const txFailed = this.txFailed;
+
     return (
       <div className="container container_bg">
 
