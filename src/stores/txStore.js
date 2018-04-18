@@ -149,7 +149,6 @@ class TxStore {
         }
     })
     .catch((e) => {
-      this.loading = false;
       console.error(e);
     });
     return status;
