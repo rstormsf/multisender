@@ -126,32 +126,29 @@ class TxStore {
     const defaultAccount = this.web3Store.defaultAccount;
     const web3 = this.web3Store.web3;
     var txDetails = await this.web3Store.web3.eth.getTransaction(txHash);
+
     if(!txDetails || txDetails.to.toLowerCase()!=proxyMultiSenderAddress.toLowerCase())
     {
       throw {
         message: "Tx is incorrect"
       }
     }
+    
+    try {
 
-    const status = await window.fetch(`https://${trustApiName}.etherscan.io/api?module=transaction&action=getstatus&txhash=${txHash}`)
-    .then((res) => {
-      return res.json();
-    })
-    .then( async (res) => {
-      const statusDescription = res;
+    const statusDescription = await window.fetch(`https://${trustApiName}.etherscan.io/api?module=transaction&action=getstatus&txhash=${txHash}`)
+    .then(res => res.json())
 
-      return {
-          isError: statusDescription.result.isError == "1",
-          description: statusDescription.result.errDescription,
-          gasPrice: txDetails.gasPrice,
-          gas: txDetails.gas,
-          inputData: txDetails.input
-        }
-    })
-    .catch((e) => {
-      console.error(e);
-    });
-    return status;
+    return {
+        isError: statusDescription.result.isError == "1",
+        description: statusDescription.result.errDescription,
+        gasPrice: txDetails.gasPrice,
+        gas: txDetails.gas,
+        inputData: txDetails.input
+      }
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   async getTxReceipt(hash){

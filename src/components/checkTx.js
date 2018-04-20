@@ -112,7 +112,6 @@ export class CheckTx extends React.Component {
               onChange={this.onTxHash}
               loadingPlaceholder="Checking your transaction..."
               placeholder="Please select or input the tx hash"
-              options={this.web3Store.userTokens.slice()}
             />
 
               </div>
