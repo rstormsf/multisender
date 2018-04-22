@@ -13,14 +13,6 @@ import StormMultiSenderABI from '../abis/StormMultisender'
 const InputDataDecoder = require('ethereum-input-data-decoder');
 const decoder = new InputDataDecoder(StormMultiSenderABI);
 
-const ownInput = ({ error, isChanged, isUsed, ...props }) => (
-  <div>
-    {isChanged && isUsed && error}
-    <input {...props} />
-  </div>
-);
-const Input = control(ownInput);
-
 @inject("UiStore")
 @observer
 export class CheckTx extends React.Component {
@@ -106,11 +98,9 @@ export class CheckTx extends React.Component {
                 <label htmlFor="tx-hash" className="label">Tx Hash</label>
                 <Select.Creatable
 
-              isLoading={this.web3Store.loading}
               name="form-field-name"
               id="tx-hash"
               onChange={this.onTxHash}
-              loadingPlaceholder="Checking your transaction..."
               placeholder="Please select or input the tx hash"
             />
 
