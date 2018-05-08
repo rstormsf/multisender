@@ -2,7 +2,7 @@
   "name": "multi-sender-app",
   "version": "0.1.0",
   "license": "GPL3",
-  "homepage": "https://poanetwork.github.io/multisender",
+  "homepage": "https://rstormsf.github.io/multisender",
   "dependencies": {
     "bignumber.js": "^6.0.0",
     "csvtojson": "^1.1.9",

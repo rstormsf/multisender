@@ -4,6 +4,8 @@ import StormMultiSenderABI from '../abis/StormMultisender'
 import Web3Utils from 'web3-utils';
 import Web3 from "web3";
 import autosave from './autosave'
+import { toJS } from 'mobx';
+
 
 const BN = require('bignumber.js');
 function add(a, b) {
@@ -156,7 +158,8 @@ class TokenStore {
   @action
   parseAddresses(){
     const newAddresses = []
-    this.jsonAddresses.forEach((account) => {
+    this.jsonAddresses.slice().forEach((account) => {
+      account = toJS(account);
       const address = Object.keys(account)[0].replace(/\s/g, "");;
       if(!Web3Utils.isAddress(address)){
         this.invalid_addresses.push(address);
