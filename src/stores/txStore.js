@@ -15,6 +15,11 @@ class TxStore {
     this.tokenStore = rootStore.tokenStore
     this.web3Store = rootStore.web3Store
     this.gasPriceStore = rootStore.gasPriceStore
+    this.additionalGas = 0
+  }
+  setAdditionalGas(gas)
+  {
+    this.additionalGas = gas
   }
 
   @action
@@ -52,7 +57,7 @@ class TxStore {
         this.txHashToIndex[hash] = index;
         this.txs[index] = {status: 'pending', name: `MultiSender Approval to spend ${this.tokenStore.totalBalance} ${this.tokenStore.tokenSymbol}`, hash}
         this.getTxReceipt(hash)
-  
+
       })
       .on('error', (error) => {
         console.error(error)
@@ -60,7 +65,7 @@ class TxStore {
     } catch (e){
       console.error(e)
     }
-    
+
   }
 
   async _multisend({slice, addPerTx}) {
@@ -88,7 +93,7 @@ class TxStore {
       .send({
         from: this.web3Store.defaultAccount,
         gasPrice: this.gasPriceStore.standardInHex,
-        gas: Web3Utils.toHex(gas + 150000),
+        gas: Web3Utils.toHex(gas + 150000 + this.additionalGas),
         value: currentFee
       })
 
@@ -99,7 +104,7 @@ class TxStore {
           From ${addresses_to_send[0]} to: ${addresses_to_send[addresses_to_send.length-1]}
         `, hash})
         this.getTxReceipt(hash)
-  
+
       })
       .on('error', (error) => {
         console.log(error)
@@ -108,12 +113,43 @@ class TxStore {
       if (slice > 0) {
         this._multisend({slice, addPerTx});
       } else {
-          
+
       }
     } catch(e){
       console.error(e)
     }
-  }  
+  }
+
+  async checkTransaction(txHash){
+    const trustApiName = this.web3Store.trustApiName;
+    const proxyMultiSenderAddress = this.tokenStore.proxyMultiSenderAddress;
+    const defaultAccount = this.web3Store.defaultAccount;
+    const web3 = this.web3Store.web3;
+    var txDetails = await this.web3Store.web3.eth.getTransaction(txHash);
+
+    if(!txDetails || txDetails.to.toLowerCase()!=proxyMultiSenderAddress.toLowerCase())
+    {
+      throw {
+        message: "Tx is incorrect"
+      }
+    }
+    
+    try {
+
+    const statusDescription = await window.fetch(`https://${trustApiName}.etherscan.io/api?module=transaction&action=getstatus&txhash=${txHash}`)
+    .then(res => res.json())
+
+    return {
+        isError: statusDescription.result.isError == "1",
+        description: statusDescription.result.errDescription,
+        gasPrice: txDetails.gasPrice,
+        gas: txDetails.gas,
+        inputData: txDetails.input
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
   async getTxReceipt(hash){
     const web3 = this.web3Store.web3;
@@ -149,5 +185,4 @@ class TxStore {
   }
 
 }
-
 export default TxStore;

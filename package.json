@@ -6,6 +6,7 @@
   "dependencies": {
     "bignumber.js": "^6.0.0",
     "csvtojson": "^1.1.9",
+    "ethereum-input-data-decoder": "0.0.3",
     "gh-pages": "^1.1.0",
     "mobx": "^3.5.1",
     "mobx-react": "^4.4.2",
@@ -25,8 +26,16 @@
     "react-validation": "^3.0.7",
     "splash-screen": "^4.0.1",
     "store2": "^2.7.0",
+    "swarm-js": "^0.1.37",
     "sweetalert": "^2.1.0",
-    "web3": "^1.0.0-beta.30"
+    "underscore": "^1.8.3",
+    "web3": "^1.0.0-beta.33",
+    "web3-core": "^1.0.0-beta.33",
+    "web3-core-requestmanager": "^1.0.0-beta.33",
+    "web3-eth-abi": "^1.0.0-beta.33",
+    "web3-eth-accounts": "^1.0.0-beta.33",
+    "web3-eth-contract": "^1.0.0-beta.33",
+    "web3-eth-personal": "^1.0.0-beta.33"
   },
   "scripts": {
     "build-css": "node-sass-chokidar src/assets/stylesheets/application.scss -o src/assets/stylesheets --output-style=compressed",

@@ -5,15 +5,17 @@ class Web3Store {
   @observable web3 = {};
   @observable defaultAccount = '';
   getWeb3Promise = null;
+  trustApiName = '';
   @observable loading = true;
   @observable errors = [];
   @observable userTokens = [];
   constructor(rootStore) {
     //TODO ADD LOADING
     this.getWeb3Promise = getWeb3().then(async (web3Config) => {
-      const {web3Instance, defaultAccount} = web3Config;
+      const {web3Instance, defaultAccount, trustApiName} = web3Config;
       this.defaultAccount = defaultAccount;
-      this.web3 = new Web3(web3Instance.currentProvider); 
+      this.trustApiName = trustApiName;
+      this.web3 = new Web3(web3Instance.currentProvider);
       this.getUserTokens(web3Config)
       console.log('web3 loaded')
     }).catch((e) => {
