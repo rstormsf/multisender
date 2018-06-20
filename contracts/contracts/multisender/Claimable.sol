@@ -1,6 +1,6 @@
 // Roman Storm Multi Sender
-// To Use this Dapp: https://poanetwork.github.io/multisender
-pragma solidity 0.4.19;
+// To Use this Dapp: https://rstormsf.github.io/multisender
+pragma solidity 0.4.23;
 
 import "./Ownable.sol";
 import "../EternalStorage.sol";

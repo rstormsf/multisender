@@ -36,6 +36,7 @@ export class FourthStep extends React.Component {
   constructor(props){
     super(props);
     this.txStore = props.UiStore.txStore;
+    this.tokenStore = props.UiStore.tokenStore;
     this.totalNumberTx = props.UiStore.tokenStore.totalNumberTx;
     this.state = {
       txCount: Number(this.totalNumberTx)

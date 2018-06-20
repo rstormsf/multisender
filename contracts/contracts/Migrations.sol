@@ -1,5 +1,5 @@
 // Roman Storm Multi Sender
-// To Use this Dapp: https://poanetwork.github.io/multisender
+// To Use this Dapp: https://rstormsf.github.io/multisender
 pragma solidity ^0.4.17;
 
 contract Migrations {

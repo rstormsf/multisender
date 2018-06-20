@@ -2,7 +2,7 @@
 // File: contracts/EternalStorage.sol
 
 // Roman Storm Multi Sender
-// To Use this Dapp: https://poanetwork.github.io/multisender
+// To Use this Dapp: https://rstormsf.github.io/multisender
 pragma solidity 0.4.20;
 
 
@@ -24,7 +24,7 @@ contract EternalStorage {
 // File: contracts/UpgradeabilityOwnerStorage.sol
 
 // Roman Storm Multi Sender
-// To Use this Dapp: https://poanetwork.github.io/multisender
+// To Use this Dapp: https://rstormsf.github.io/multisender
 pragma solidity 0.4.20;
 
 
@@ -56,7 +56,7 @@ contract UpgradeabilityOwnerStorage {
 // File: contracts/Proxy.sol
 
 // Roman Storm Multi Sender
-// To Use this Dapp: https://poanetwork.github.io/multisender
+// To Use this Dapp: https://rstormsf.github.io/multisender
 pragma solidity 0.4.20;
 
 
@@ -98,7 +98,7 @@ contract Proxy {
 // File: contracts/UpgradeabilityStorage.sol
 
 // Roman Storm Multi Sender
-// To Use this Dapp: https://poanetwork.github.io/multisender
+// To Use this Dapp: https://rstormsf.github.io/multisender
 pragma solidity 0.4.20;
 
 
@@ -133,7 +133,7 @@ contract UpgradeabilityStorage {
 // File: contracts/UpgradeabilityProxy.sol
 
 // Roman Storm Multi Sender
-// To Use this Dapp: https://poanetwork.github.io/multisender
+// To Use this Dapp: https://rstormsf.github.io/multisender
 pragma solidity 0.4.20;
 
 
@@ -167,7 +167,7 @@ contract UpgradeabilityProxy is Proxy, UpgradeabilityStorage {
 // File: contracts/OwnedUpgradeabilityProxy.sol
 
 // Roman Storm Multi Sender
-// To Use this Dapp: https://poanetwork.github.io/multisender
+// To Use this Dapp: https://rstormsf.github.io/multisender
 pragma solidity 0.4.20;
 
 
@@ -244,7 +244,7 @@ contract OwnedUpgradeabilityProxy is UpgradeabilityOwnerStorage, UpgradeabilityP
 // File: contracts/EternalStorageProxyForStormMultisender.sol
 
 // Roman Storm Multi Sender
-// To Use this Dapp: https://poanetwork.github.io/multisender
+// To Use this Dapp: https://rstormsf.github.io/multisender
 pragma solidity 0.4.20;
 
 

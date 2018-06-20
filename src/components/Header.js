@@ -6,7 +6,7 @@ export const Header = () => (
     <div className="container">
       <a href="#" className="header-logo"></a>
       <form className="form form_header">
-      
+        {/* <Link className="button" to='/retry'>Retry Failed Transaction</Link> */}
         <label htmlFor="network" className="label">MultiSender Address: {process.env.REACT_APP_PROXY_MULTISENDER}</label>
         {/* <select id="network" className="select">
           <option value="">YourTokens</option>

@@ -25,9 +25,13 @@ class Web3Store {
     window.fetch(`https://${trustApiName}.trustwalletapp.com/tokens?address=${defaultAccount}`).then((res) => {
       return res.json()
     }).then((res) => {
-      const tokens = res.docs.map(({contract}) => {
+      let tokens = res.docs.map(({contract}) => {
         const {address, symbol} = contract;
         return {label: `${symbol} - ${address}`, value: address}
+      })
+      tokens.unshift({
+        value: '0x000000000000000000000000000000000000bEEF',
+        label: "ETH - Ethereum Native Currency"
       })
       this.userTokens = tokens;
       this.loading = false;

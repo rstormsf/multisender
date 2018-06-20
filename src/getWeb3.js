@@ -69,7 +69,7 @@ let getWeb3 = () => {
       } else {
         // Fallback to localhost if no web3 injection.
         const errorMsg = `Metamask is not installed. Please go to
-        <a target="_blank" href="https://metamask.io">Metamask website</a> and return to this page after you installed it`
+        https://metamask.io and return to this page after you installed it`
         reject({message: errorMsg})
         console.log('No web3 instance injected, using Local web3.');
         console.error('Metamask not found'); 

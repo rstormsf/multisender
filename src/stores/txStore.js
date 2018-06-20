@@ -65,8 +65,9 @@ class TxStore {
 
   async _multisend({slice, addPerTx}) {
     const token_address = this.tokenStore.tokenAddress
-    let {addresses_to_send, balances_to_send, proxyMultiSenderAddress, currentFee} =  this.tokenStore;
-    currentFee = Web3Utils.toHex(Web3Utils.toWei(currentFee))
+    let {addresses_to_send, balances_to_send, proxyMultiSenderAddress, currentFee, totalBalance} =  this.tokenStore;
+    console.log(totalBalance, currentFee)
+    let ethValue = token_address === "0x000000000000000000000000000000000000bEEF" ? new BN(currentFee).plus(new BN(totalBalance)) : new BN(currentFee)
     const start = (slice - 1) * addPerTx;
     const end = slice * addPerTx;
     addresses_to_send = addresses_to_send.slice(start, end);
@@ -80,7 +81,7 @@ class TxStore {
       let gas = await web3.eth.estimateGas({
           from: this.web3Store.defaultAccount,
           data: encodedData,
-          value: currentFee,
+          value: Web3Utils.toHex(Web3Utils.toWei(ethValue.toString())),
           to: proxyMultiSenderAddress
       })
       console.log('gas', gas)
@@ -89,7 +90,7 @@ class TxStore {
         from: this.web3Store.defaultAccount,
         gasPrice: this.gasPriceStore.standardInHex,
         gas: Web3Utils.toHex(gas + 150000),
-        value: currentFee
+        value: Web3Utils.toHex(Web3Utils.toWei(ethValue.toString())),
       })
 
       .on('transactionHash', (hash) => {
@@ -98,7 +99,15 @@ class TxStore {
         this.txs.push({status: 'pending', name: `Sending Batch #${this.txs.length} ${this.tokenStore.tokenSymbol}\n
           From ${addresses_to_send[0]} to: ${addresses_to_send[addresses_to_send.length-1]}
         `, hash})
-        this.getTxReceipt(hash)
+        const interval = window.setInterval(async () => {
+          const res = await this.getTxReceipt(hash)
+          if(res && res.blockNumber){
+            window.clearInterval(interval);
+            this.getTxStatus(hash)
+          } else {
+            console.log('not mined yet', hash)
+          }
+        }, 5000)
   
       })
       .on('error', (error) => {
@@ -116,17 +125,13 @@ class TxStore {
   }  
 
   async getTxReceipt(hash){
-    const web3 = this.web3Store.web3;
-    web3.eth.getTransaction(hash, (error, res) => {
-      if(res && res.blockNumber){
-        this.getTxStatus(hash)
-      } else {
-        console.log('not mined yet', hash)
-        setTimeout(() => {
-          this.getTxReceipt(hash)
-        }, 5000)
-      }
-    })
+    try {
+      const web3 = this.web3Store.web3;
+      const res = await web3.eth.getTransaction(hash);
+      return res;
+    } catch(e) {
+      console.error(e);
+    }
   }
 
   async getTxStatus(hash) {
