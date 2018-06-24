@@ -161,6 +161,9 @@ class TokenStore {
   @action
   parseAddresses(){
     const newAddresses = []
+    this.addresses_to_send = []
+    this.totalBalance = 0;
+    this.invalid_addresses = [];
     this.jsonAddresses.forEach((account) => {
       const address = Object.keys(account)[0].replace(/\s/g, "");;
       if(!Web3Utils.isAddress(address)){
