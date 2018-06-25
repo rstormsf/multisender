@@ -23,6 +23,7 @@ class TokenStore {
   @observable totalBalance = '0'
   @observable arrayLimit = 0
   @observable errors = []
+  @observable dublicates = []
   proxyMultiSenderAddress = process.env.REACT_APP_PROXY_MULTISENDER
   
   constructor(rootStore) {
@@ -150,36 +151,50 @@ class TokenStore {
     })
   }
 
+  @action
   setDecimals(decimals) {
     this.decimals = decimals;
   }
 
+  @action
   setJsonAddresses(addresses){
     this.jsonAddresses = addresses;
   }
 
   @action
   parseAddresses(){
-    const newAddresses = []
     this.addresses_to_send = []
+    this.dublicates = []
     this.totalBalance = 0;
     this.invalid_addresses = [];
+    this.balances_to_send = [];
     this.jsonAddresses.forEach((account) => {
       const address = Object.keys(account)[0].replace(/\s/g, "");;
       if(!Web3Utils.isAddress(address)){
         this.invalid_addresses.push(address);
       } else {
-        this.addresses_to_send.push(address);
         let balance = Object.values(account)[0];
         this.totalBalance = new BN(balance).plus(this.totalBalance).toString(10)
-        const acc = {}
-        acc[`"${address}"`] = balance
-        newAddresses.push(acc)
         balance = this.multiplier.times(balance);
-        this.balances_to_send.push(balance.toString(10))
+        const indexAddr = this.addresses_to_send.indexOf(address);
+        if(indexAddr === -1){
+          this.addresses_to_send.push(address);  
+          this.balances_to_send.push(balance.toString(10))
+        } else {
+          if(this.dublicates.indexOf(address) === -1){
+            this.dublicates.push(address);
+          }
+          this.balances_to_send[indexAddr] = (new BN(this.balances_to_send[indexAddr]).plus(balance)).toString(10)
+        }
       }
     })
-    this.jsonAddresses = newAddresses
+    
+    this.jsonAddresses = this.addresses_to_send.map((addr, index) => {
+      let obj = {}
+      obj[addr] = (new BN(this.balances_to_send[index]).div(this.multiplier)).toString(10)
+      return obj;
+    })
+    console.log(this.jsonAddresses.slice(), this.addresses_to_send.slice(), 'doneeee')
     if(this.tokenAddress === "0x000000000000000000000000000000000000bEEF") {
       this.allowance = this.totalBalance
     }

@@ -19,25 +19,26 @@ class TxStore {
 
   @action
   async doSend(){
+    this.txs = [];
+    this.approval = '';
     if(new BN(this.tokenStore.totalBalance).gt(new BN(this.tokenStore.allowance))){
       this._approve();
-      const disposer = autorun(() => {
+      const interval = setInterval(() => {
+        const index = this.txHashToIndex[this.approval];
+        console.log('checking autorun', index, this.approval, this.txHashToIndex, toJS(this.txs))
         if(this.approval){
-          const index = this.txHashToIndex[this.approval];
-          console.log('checking autorun', index, this.approval, this.txHashToIndex, toJS(this.txs))
           if(this.txs[index] && this.txs[index].status === 'mined'){
-            console.log('lets GO!')
+            clearInterval(interval);
+            console.log('lets GO!', this.tokenStore.totalNumberTx, this.tokenStore.arrayLimit)
             setTimeout(() => {
               this._multisend({slice: this.tokenStore.totalNumberTx, addPerTx: this.tokenStore.arrayLimit})
-            }, 5000)
-            disposer()
+            }, 1000)
           }
         }
-      })
+      }, 3000)
     } else {
       this._multisend({slice: this.tokenStore.totalNumberTx, addPerTx: this.tokenStore.arrayLimit})
     }
-    // console.log('doSend')
   }
 
   async _approve(){
@@ -51,7 +52,7 @@ class TxStore {
         this.approval = hash
         this.txHashToIndex[hash] = index;
         this.txs[index] = {status: 'pending', name: `MultiSender Approval to spend ${this.tokenStore.totalBalance} ${this.tokenStore.tokenSymbol}`, hash}
-        this.getTxReceipt(hash)
+        this.getTxStatus(hash)
   
       })
       .on('error', (error) => {
@@ -125,6 +126,7 @@ class TxStore {
   }  
 
   async getTxReceipt(hash){
+    console.log('getTxReceipt')
     try {
       const web3 = this.web3Store.web3;
       const res = await web3.eth.getTransaction(hash);
@@ -136,21 +138,23 @@ class TxStore {
 
   async getTxStatus(hash) {
     console.log('GET TX STATUS', hash)
-    const web3 = this.web3Store.web3;
-    web3.eth.getTransactionReceipt(hash, (error, res) => {
-      if(res && res.blockNumber){
-        if(res.status === '0x1'){
-          const index = this.txHashToIndex[hash]
-          this.txs[index].status = `mined`
+    setTimeout(() => {
+      const web3 = this.web3Store.web3;
+      web3.eth.getTransactionReceipt(hash, (error, res) => {
+        if(res && res.blockNumber){
+          if(res.status === '0x1'){
+            const index = this.txHashToIndex[hash]
+            this.txs[index].status = `mined`
+          } else {
+            const index = this.txHashToIndex[hash]
+            this.txs[index].status = `error`
+            this.txs[index].name = `Mined but with errors. Perhaps out of gas`
+          }
         } else {
-          const index = this.txHashToIndex[hash]
-          this.txs[index].status = `error`
-          this.txs[index].name = `Mined but with errors. Perhaps out of gas`
+          this.getTxStatus(hash)
         }
-      } else {
-        this.getTxStatus(hash)
-      }
-    })
+      })
+    }, 3000)
   }
 
 }

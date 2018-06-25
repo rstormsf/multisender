@@ -1,12 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { inject, observer } from "mobx-react";
-import swal from 'sweetalert';
 
 
 const Transaction = (tx) => {
   const {name, hash, status} = tx.tx;
-  console.log(tx)
   let classname;
   switch(status){
     case 'mined':
@@ -25,7 +22,7 @@ const Transaction = (tx) => {
   return (
     <div className="table-tr">
       <div className={`table-td table-td_check-hash ${classname}`}>
-        TxHash: {hash} <br/> {name} <br/> Status: {status}
+        TxHash: <a target="_blank" href={`${tx.explorerUrl}/tx/${hash}`}>{hash}</a> <br/> {name} <br/> Status: {status}
       </div>
     </div>
   )
@@ -38,6 +35,7 @@ export class FourthStep extends React.Component {
     this.txStore = props.UiStore.txStore;
     this.tokenStore = props.UiStore.tokenStore;
     this.totalNumberTx = props.UiStore.tokenStore.totalNumberTx;
+    this.explorerUrl = props.UiStore.web3Store.explorerUrl;
     this.state = {
       txCount: Number(this.totalNumberTx)
     }
@@ -46,15 +44,21 @@ export class FourthStep extends React.Component {
     this.txStore.doSend()
   }
   render () {
+    let totalNumberOftx;
+    if(this.tokenStore.totalBalance > this.tokenStore.allowance){
+      totalNumberOftx = Number(this.totalNumberTx) + 1;
+    } else {
+      totalNumberOftx = Number(this.totalNumberTx)
+    }
+
     const txHashes = this.txStore.txs.map((tx, index) => {
-      console.log(tx)
-      return <Transaction key={index} tx={{...tx}}/>
+      return <Transaction key={index} tx={{...tx}} explorerUrl={this.explorerUrl}/>
     })
     let status;
-    if(this.txStore.txs.length === Number(this.totalNumberTx) + 1){
+    if(this.txStore.txs.length === totalNumberOftx){
       status =  "Transactions were sent out. Now wait until all transactions are mined."
     } else {
-      const txCount = Number(this.totalNumberTx) - this.txStore.txs.length + 1
+      const txCount = totalNumberOftx - this.txStore.txs.length
       status = `Please wait...until you sign ${txCount} transactions in Metamask`
     }
     return (

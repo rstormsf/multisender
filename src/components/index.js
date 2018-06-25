@@ -5,3 +5,4 @@ export { ThirdStep } from './3';
 export { FourthStep } from './4';
 export { FifthStep } from './5';
 export { Retry } from './Retry';
+export { Welcome } from './Welcome';

@@ -9,7 +9,6 @@ import { inject, observer } from "mobx-react";
 import swal from 'sweetalert';
 import generateElement from '../generateElement'
 import Example from './example.json'
-import ExampleCSV from './example.csv'
 import { PulseLoader} from 'react-spinners';
 import {RadioGroup, Radio} from 'react-radio-group';
 import csvtojson from 'csvtojson'
@@ -58,13 +57,14 @@ export class FirstStep extends React.Component {
     this.onJsonChange = this.onJsonChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.state ={
-      json: [],
-      format: 'json',
+      format: '',
       placeholder: JSON.stringify(Example),
       tokenAddress: {label: '', value: null}
     }
     this.onSelectFormat = this.onSelectFormat.bind(this)
     this.onParse = this.onParse.bind(this)
+    this.parseCompleted = false;
+    this.list = [];
   }
   async onTokenAddress(e){
     if(!e){
@@ -85,18 +85,43 @@ export class FirstStep extends React.Component {
 0x00b5F428905DEA1a67940093fFeaCeee58cA91Ae,1.049
 0x00fC79F38bAf0dE21E1fee5AC4648Bc885c1d774,14546
   `})
+    swal("Information", `Please provide CSV file in comma separated address,balance format one line per address.
+    \nExample:\n 
+0xCBA5018De6b2b6F89d84A1F5A68953f07554765e,12
+0xa6Bf70bd230867c870eF13631D7EFf1AE8Ab85c9,113.45
+0x00b5F428905DEA1a67940093fFeaCeee58cA91Ae,1.049
+0x00fC79F38bAf0dE21E1fee5AC4648Bc885c1d774,14546
+    `, 'info')
     } else {
       this.setState({format: newFormat, placeholder: JSON.stringify(Example)})
+      swal({
+        content: generateElement(`<div style="color:black;">
+        Please provide JSON-array file in the following format.
+        \nExample:\n 
+        <div style="font-size: 12px;color:purple;">
+        [<br/>
+          {"0xCBA5018De6b2b6F89d84A1F5A68953f07554765e":"12"},
+          {"0xa6Bf70bd230867c870eF13631D7EFf1AE8Ab85c9":"1123.45645"},
+          {"0x00b5F428905DEA1a67940093fFeaCeee58cA91Ae":"1.049"},
+          {"0x00fC79F38bAf0dE21E1fee5AC4648Bc885c1d774":"14546"}
+          <br/>]
+        </div>
+        </div>
+        `),
+        icon: 'info'
+      })
+      
     }
   }
   onDecimalsChange(e) {
     this.tokenStore.setDecimals(e.target.value)
   }
-  onJsonChange(e) {
+
+  onJsonChange(value) {
     try {
-      let addresses = JSON.parse(e.target.value);
-      console.log(addresses)
+      let addresses = JSON.parse(value);
       this.tokenStore.setJsonAddresses(addresses)
+      this.parseCompleted = true;
     } catch(e) {
       const error = e.message.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
       console.error(error)
@@ -107,45 +132,66 @@ export class FirstStep extends React.Component {
     }
   }
 
-  onCsvChange(e){
-    let addresses = [];
-    console.log(e.target.value)
-    csvtojson({noheader:true})
-    .fromString(e.target.value)
-      .on('csv',(csv)=>{
-        let el = {};
-        if(csv.length === 2){
-          Object.defineProperty(el, csv[0], {
-            value: csv[1],
-            writable: true,
-            configurable: true,
-            enumerable: true,
-          });
-          addresses.push(el)
-        } 
-      })
-      .on('end', () => {
-        try {
-          this.tokenStore.setJsonAddresses(addresses)
-        } catch(e) {
-          console.error(e)
-          swal({
-            content: "Your CSV is invalid",
-            icon: "error",
-          })
-        }
-      })
+  async onCsvChange(value){
+    return new Promise((res, rej) => {
+      let addresses = [];
+      console.log(value)
+      csvtojson({noheader:true})
+      .fromString(value)
+        .on('csv',(csv)=>{
+          let el = {};
+          if(csv.length === 2){
+            Object.defineProperty(el, csv[0], {
+              value: csv[1],
+              writable: true,
+              configurable: true,
+              enumerable: true,
+            });
+            addresses.push(el)
+          } 
+        })
+        .on('end', () => {
+          try {
+            console.log('csv is done')
+            this.parseCompleted = true;
+            this.tokenStore.setJsonAddresses(addresses)
+            res(addresses);
+          } catch(e) {
+            console.error(e)
+            rej(e);
+            swal({
+              content: "Your CSV is invalid",
+              icon: "error",
+            })
+          }
+        })
+    })
   }
 
   onParse(e){
+    this.list = e.target.value;
     if(this.state.format === 'json') {
-      this.onJsonChange(e)
-    } else {
-      this.onCsvChange(e)
+      this.onJsonChange(e.target.value)
     }
+    if(this.state.format === 'csv'){
+      this.onCsvChange(e.target.value)
+    }
+    return
   }
-  onSubmit(e){
+  async onSubmit(e){
     e.preventDefault()
+    if(this.state.format === ''){
+      swal("Error!", "Please select format CSV or JSON", 'error')
+      return
+    }
+    console.log('onSubmit', this.parseCompleted, this.state.format)
+    if(!this.parseCompleted){
+      if(this.state.format === 'json') {
+        this.onJsonChange(this.list)
+      } else {
+        await this.onCsvChange(this.list)
+      }
+    }
     this.tokenStore.parseAddresses()
     this.props.history.push('/3')
   }
