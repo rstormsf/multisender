@@ -14,9 +14,8 @@ export class Header extends React.Component {
           <form className="form form_header">
             {/* <Link className="button" to='/retry'>Retry Failed Transaction</Link> */}
             <label htmlFor="network" 
-                className="label">MultiSender Address:
-                 <a target="_blank" href={`${explorerUrl}/address/${process.env.REACT_APP_PROXY_MULTISENDER}`}>
-                 {process.env.REACT_APP_PROXY_MULTISENDER}</a>
+                className="label">MultiSender Address: <a target="_blank" href={`${explorerUrl}/address/${process.env.REACT_APP_PROXY_MULTISENDER}`}>
+                   {process.env.REACT_APP_PROXY_MULTISENDER}</a>
             </label>
             {/* <select id="network" className="select">
               <option value="">YourTokens</option>
