@@ -162,42 +162,46 @@ class TokenStore {
   }
 
   @action
-  parseAddresses(){
+  async parseAddresses(){
     this.addresses_to_send = []
     this.dublicates = []
     this.totalBalance = 0;
     this.invalid_addresses = [];
     this.balances_to_send = [];
-    this.jsonAddresses.forEach((account) => {
-      const address = Object.keys(account)[0].replace(/\s/g, "");;
-      if(!Web3Utils.isAddress(address)){
-        this.invalid_addresses.push(address);
-      } else {
-        let balance = Object.values(account)[0];
-        this.totalBalance = new BN(balance).plus(this.totalBalance).toString(10)
-        balance = this.multiplier.times(balance);
-        const indexAddr = this.addresses_to_send.indexOf(address);
-        if(indexAddr === -1){
-          this.addresses_to_send.push(address);  
-          this.balances_to_send.push(balance.toString(10))
+    return new Promise((res, rej) => {
+      
+      this.jsonAddresses.forEach((account) => {
+        const address = Object.keys(account)[0].replace(/\s/g, "");;
+        if(!Web3Utils.isAddress(address)){
+          this.invalid_addresses.push(address);
         } else {
-          if(this.dublicates.indexOf(address) === -1){
-            this.dublicates.push(address);
+          let balance = Object.values(account)[0];
+          this.totalBalance = new BN(balance).plus(this.totalBalance).toString(10)
+          balance = this.multiplier.times(balance);
+          const indexAddr = this.addresses_to_send.indexOf(address);
+          if(indexAddr === -1){
+            this.addresses_to_send.push(address);  
+            this.balances_to_send.push(balance.toString(10))
+          } else {
+            if(this.dublicates.indexOf(address) === -1){
+              this.dublicates.push(address);
+            }
+            this.balances_to_send[indexAddr] = (new BN(this.balances_to_send[indexAddr]).plus(balance)).toString(10)
           }
-          this.balances_to_send[indexAddr] = (new BN(this.balances_to_send[indexAddr]).plus(balance)).toString(10)
         }
+      })
+      
+      this.jsonAddresses = this.addresses_to_send.map((addr, index) => {
+        let obj = {}
+        obj[addr] = (new BN(this.balances_to_send[index]).div(this.multiplier)).toString(10)
+        return obj;
+      })
+      res(this.jsonAddresses)
+      if(this.tokenAddress === "0x000000000000000000000000000000000000bEEF") {
+        this.allowance = this.totalBalance
       }
+
     })
-    
-    this.jsonAddresses = this.addresses_to_send.map((addr, index) => {
-      let obj = {}
-      obj[addr] = (new BN(this.balances_to_send[index]).div(this.multiplier)).toString(10)
-      return obj;
-    })
-    console.log(this.jsonAddresses.slice(), this.addresses_to_send.slice(), 'doneeee')
-    if(this.tokenAddress === "0x000000000000000000000000000000000000bEEF") {
-      this.allowance = this.totalBalance
-    }
   }
 
   @computed get totalBalanceWithDecimals() {

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Header, FirstStep, SecondStep, ThirdStep, FourthStep, FifthStep, Retry, Welcome } from './components';
 import { Route, Redirect } from 'react-router-dom';
-import { inject, observer } from "mobx-react";
+import { inject } from "mobx-react";
 import './assets/stylesheets/application.css';
 
 const PrivateRoute = ({ component: Component, startedUrl, ...rest }) => (
@@ -23,12 +23,16 @@ const PrivateRoute = ({ component: Component, startedUrl, ...rest }) => (
 
 @inject("UiStore")
 export class App extends React.Component {
+  constructor(props){
+    super(props);
+    this.web3Store = props.UiStore.web3Store;
+  }
   render(){
-    let startedUrl = this.props.UiStore.web3Store.startedUrl
-    
+    let startedUrl = this.web3Store.startedUrl
+    console.log('fix tx queue')
     return (
       <div>
-        <Header/>
+        <Header />
         <Route exact path="/" component={FirstStep}/>
         <Route exact path="/1" component={FirstStep}/>
         <PrivateRoute path="/2" component={SecondStep} startedUrl={startedUrl} />
@@ -36,7 +40,6 @@ export class App extends React.Component {
         <PrivateRoute exact path="/3" component={ThirdStep} startedUrl={startedUrl}/>
         <PrivateRoute exact path="/4" component={FourthStep} startedUrl={startedUrl}/>
         <PrivateRoute exact path="/5" component={FifthStep} startedUrl={startedUrl}/>
-
         {/* <Route exact path="/retry" component={Retry}/> */}
       </div>
     );

@@ -14,14 +14,6 @@ export class ThirdStep extends React.Component {
     this.onNext = this.onNext.bind(this)
   }
   componentDidMount() {
-    if(this.tokenStore.invalid_addresses.length > 0){
-
-      swal({
-        title: "There are invalid eth addresses",
-        text: this.tokenStore.invalid_addresses.toString(),
-        icon: "error",
-      })
-    }
     if(this.tokenStore.dublicates.length > 0){
 
       swal({

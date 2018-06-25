@@ -135,7 +135,6 @@ export class FirstStep extends React.Component {
   async onCsvChange(value){
     return new Promise((res, rej) => {
       let addresses = [];
-      console.log(value)
       csvtojson({noheader:true})
       .fromString(value)
         .on('csv',(csv)=>{
@@ -184,7 +183,7 @@ export class FirstStep extends React.Component {
       swal("Error!", "Please select format CSV or JSON", 'error')
       return
     }
-    console.log('onSubmit', this.parseCompleted, this.state.format)
+    
     if(!this.parseCompleted){
       if(this.state.format === 'json') {
         this.onJsonChange(this.list)
@@ -192,8 +191,17 @@ export class FirstStep extends React.Component {
         await this.onCsvChange(this.list)
       }
     }
-    this.tokenStore.parseAddresses()
-    this.props.history.push('/3')
+    await this.tokenStore.parseAddresses()
+    if(this.tokenStore.invalid_addresses.length > 0){
+      swal({
+        title: "There are invalid eth addresses. If you click Next, multisender will remove them from the list.",
+        text: JSON.stringify(this.tokenStore.invalid_addresses.slice(), null, '\n'),
+        icon: "error",
+      })
+    } else {
+      this.props.history.push('/3')
+    }
+    return
   }
   render () {
     if(this.tokenStore.errors.length > 0){
@@ -218,7 +226,7 @@ export class FirstStep extends React.Component {
             This Dapp supports Mainnet, POA-Core, POA-sokol, Ropsten, Rinkeby, Kovan <br/>
             Please wait while all your token balances are loaded
           </p>
-          <Form className="form" onSubmit={this.onSubmit}>
+          <Form className="form">
             <div className="form-inline">
               <div className="form-inline-i form-inline-i_token-address">
                 <label htmlFor="token-address" className="label">Token Address</label>
@@ -253,7 +261,7 @@ export class FirstStep extends React.Component {
               validations={[required]}
               placeholder={`Example: ${this.state.placeholder}`}
               onBlur={this.onParse} id="addresses-with-balances" className="textarea"></Textarea>
-            <Button className="button button_next">Next</Button>
+            <Button onClick={this.onSubmit} className="button button_next">Next</Button>
           </Form>
         </div>
       </div>

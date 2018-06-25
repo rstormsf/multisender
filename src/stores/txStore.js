@@ -67,7 +67,7 @@ class TxStore {
   async _multisend({slice, addPerTx}) {
     const token_address = this.tokenStore.tokenAddress
     let {addresses_to_send, balances_to_send, proxyMultiSenderAddress, currentFee, totalBalance} =  this.tokenStore;
-    console.log(totalBalance, currentFee)
+    
     let ethValue = token_address === "0x000000000000000000000000000000000000bEEF" ? new BN(currentFee).plus(new BN(totalBalance)) : new BN(currentFee)
     const start = (slice - 1) * addPerTx;
     const end = slice * addPerTx;
@@ -97,19 +97,10 @@ class TxStore {
       .on('transactionHash', (hash) => {
         // console.log('txHash',hash)
         this.txHashToIndex[hash] = this.txs.length
-        this.txs.push({status: 'pending', name: `Sending Batch #${this.txs.length} ${this.tokenStore.tokenSymbol}\n
+        this.txs.push({status: 'pending', name: `Sending Batch #${this.txs.length + 1} ${this.tokenStore.tokenSymbol}\n
           From ${addresses_to_send[0]} to: ${addresses_to_send[addresses_to_send.length-1]}
         `, hash})
-        const interval = window.setInterval(async () => {
-          const res = await this.getTxReceipt(hash)
-          if(res && res.blockNumber){
-            window.clearInterval(interval);
-            this.getTxStatus(hash)
-          } else {
-            console.log('not mined yet', hash)
-          }
-        }, 5000)
-  
+        this.getTxStatus(hash)
       })
       .on('error', (error) => {
         console.log(error)

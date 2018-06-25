@@ -17,12 +17,16 @@ class Web3Store {
       this.defaultAccount = defaultAccount;
       this.web3 = new Web3(web3Instance.currentProvider); 
       this.getUserTokens(web3Config)
-      this.explorerUrl = web3Config.explorerUrl
+      this.setExplorerUrl(web3Config.explorerUrl)
       console.log('web3 loaded')
     }).catch((e) => {
       console.error(e,'web3 not loaded')
       this.errors.push(e.message)
     })
+  }
+  @action
+  setExplorerUrl(url){
+    this.explorerUrl = url
   }
   @action
   setStartedUrl(url){

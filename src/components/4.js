@@ -35,6 +35,7 @@ export class FourthStep extends React.Component {
     this.txStore = props.UiStore.txStore;
     this.tokenStore = props.UiStore.tokenStore;
     this.totalNumberTx = props.UiStore.tokenStore.totalNumberTx;
+    console.log(this.totalNumberTx, 'from store')
     this.explorerUrl = props.UiStore.web3Store.explorerUrl;
     this.state = {
       txCount: Number(this.totalNumberTx)
@@ -45,7 +46,8 @@ export class FourthStep extends React.Component {
   }
   render () {
     let totalNumberOftx;
-    if(this.tokenStore.totalBalance > this.tokenStore.allowance){
+    
+    if(Number(this.tokenStore.totalBalance) >= Number(this.tokenStore.allowance)){
       totalNumberOftx = Number(this.totalNumberTx) + 1;
     } else {
       totalNumberOftx = Number(this.totalNumberTx)
