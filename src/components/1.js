@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import Web3Utils from 'web3-utils';
 import Form from 'react-validation/build/form';
 import Textarea from 'react-validation/build/textarea';
@@ -52,6 +51,7 @@ export class FirstStep extends React.Component {
     super(props);
     this.tokenStore = props.UiStore.tokenStore;
     this.web3Store = props.UiStore.web3Store;
+    this.web3Store.setStartedUrl('#/');
     this.onTokenAddress = this.onTokenAddress.bind(this);
     this.onDecimalsChange = this.onDecimalsChange.bind(this);
     this.onJsonChange = this.onJsonChange.bind(this);

@@ -9,6 +9,7 @@ class Web3Store {
   @observable errors = [];
   @observable userTokens = [];
   @observable explorerUrl = '';
+  @observable startedUrl = window.location.hash
   constructor(rootStore) {
     
     this.getWeb3Promise = getWeb3().then(async (web3Config) => {
@@ -22,6 +23,10 @@ class Web3Store {
       console.error(e,'web3 not loaded')
       this.errors.push(e.message)
     })
+  }
+  @action
+  setStartedUrl(url){
+    this.startedUrl = url;
   }
   async getUserTokens({trustApiName, defaultAccount}) {
     window.fetch(`https://${trustApiName}.trustwalletapp.com/tokens?address=${defaultAccount}`).then((res) => {
