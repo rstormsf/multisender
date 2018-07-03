@@ -6,7 +6,8 @@ import { inject, observer } from "mobx-react";
 @observer
 export class Header extends React.Component {
   render() {
-    const explorerUrl = this.props.UiStore.web3Store.explorerUrl;
+    const explorerUrl = this.props.UiStore.web3Store.explorerUrl || 'https://etherscan.io';
+    
     return (
     <header className="header">
         <div className="container">

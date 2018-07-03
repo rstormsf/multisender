@@ -4,6 +4,8 @@ import ReactJson from 'react-json-view'
 import { inject, observer } from "mobx-react";
 import BN from 'bignumber.js'
 import swal from 'sweetalert';
+import Select from 'react-select';
+
 @inject("UiStore")
 @observer
 export class ThirdStep extends React.Component {
@@ -11,7 +13,11 @@ export class ThirdStep extends React.Component {
     super(props);
     this.tokenStore = props.UiStore.tokenStore;
     this.gasPriceStore = props.UiStore.gasPriceStore;
+    console.log(this.gasPriceStore.gasPricesArray)
     this.onNext = this.onNext.bind(this)
+    this.state = {
+      gasPrice: ''
+    }
   }
   componentDidMount() {
     if(this.tokenStore.dublicates.length > 0){
@@ -45,6 +51,12 @@ export class ThirdStep extends React.Component {
     }
     this.props.history.push('/4')
   }
+
+  onGasPriceChange = (selected) => {
+    if(selected){
+      this.gasPriceStore.setSelectedGasPrice(selected.value)
+    }
+  }
   render() {
     return (
       <div className="container container_bg">
@@ -62,6 +74,17 @@ export class ThirdStep extends React.Component {
               name={false}
               theme="solarized"
               src={this.tokenStore.jsonAddresses.slice()} />
+              <div style={{padding: "25px 0px"}}>
+                <p>Network Speed (Gas Price)</p>
+                <Select.Creatable
+                  isLoading={this.gasPriceStore.loading}
+                  value={this.gasPriceStore.selectedGasPrice}
+                  onChange={this.onGasPriceChange}
+                  loadingPlaceholder="Fetching gas Price data ..."
+                  placeholder="Please select desired network speed"
+                  options={this.gasPriceStore.gasPricesArray.slice()}
+                />
+              </div>
             <div className="send-info">
               <div className="send-info-side">
                 <div className="send-info-i">
@@ -73,7 +96,7 @@ export class ThirdStep extends React.Component {
                   <p className="send-info-amount">{this.tokenStore.defAccTokenBalance} {this.tokenStore.tokenSymbol}</p>
                 </div>
                 <div className="send-info-i">
-                  <p>Your Current fee Per tx</p>
+                  <p>Your Contract's Current fee Per tx</p>
                   <p className="send-info-amount">{this.tokenStore.currentFee} ETH</p>
                 </div>
                 <div className="send-info-i">
@@ -101,13 +124,14 @@ export class ThirdStep extends React.Component {
                   </p>
                 </div>
                 <div className="send-info-i">
-                  <p>Instant Gas Price</p>
+                  <p>Selected Network speed (Gas Price)</p>
                   <p className="send-info-amount">
-                  {this.gasPriceStore.gasPrices.fast} gwei
+                  {this.gasPriceStore.selectedGasPrice} gwei
                   </p>
                 </div>
               </div>
             </div>
+            
             <Link onClick={this.onNext} className="button button_next" to='/4'>Next</Link>
           </form>
         </div>
