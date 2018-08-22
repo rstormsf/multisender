@@ -29,7 +29,7 @@ export class App extends React.Component {
   }
   render(){
     let startedUrl = this.web3Store.startedUrl
-    console.log('fix tx queue')
+    console.log('fix eth multisend')
     return (
       <div>
         <Header />

@@ -68,11 +68,22 @@ class TxStore {
     const token_address = this.tokenStore.tokenAddress
     let {addresses_to_send, balances_to_send, proxyMultiSenderAddress, currentFee, totalBalance} =  this.tokenStore;
     
-    let ethValue = token_address === "0x000000000000000000000000000000000000bEEF" ? new BN(currentFee).plus(new BN(totalBalance)) : new BN(currentFee)
+    
     const start = (slice - 1) * addPerTx;
     const end = slice * addPerTx;
     addresses_to_send = addresses_to_send.slice(start, end);
     balances_to_send = balances_to_send.slice(start, end);
+    let ethValue;
+    if(token_address === "0x000000000000000000000000000000000000bEEF"){
+      
+      const totalInWei = balances_to_send.reduce((total, num) => {
+        return (new BN(total).plus(new BN(num)))
+      })
+      const totalInEth = Web3Utils.fromWei(totalInWei.toString())
+      ethValue = new BN(currentFee).plus(totalInEth)
+    } else {
+      ethValue = new BN(currentFee)
+    }
     console.log('slice', slice, addresses_to_send[0], balances_to_send[0], addPerTx)
     const web3 = this.web3Store.web3;
     const multisender = new web3.eth.Contract(MultiSenderAbi, proxyMultiSenderAddress);
