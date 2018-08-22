@@ -18,7 +18,7 @@ This Dapp allows a user to send thousands of token transfers in a very effecient
 9. Click next.
 10. If everything looks good, click next once again.
 11. Wait for MetaMask to generate an approval transaction.
-12. Once the approval transaction is mined, MetaMask will generate as many transactions as needed for your token transfers (175 addresses per tx).
+12. Once the approval transaction is mined, MetaMask will generate as many transactions as needed for your token transfers (145 addresses per tx).
 13. Done!
 
 You can test this tool on any test network, if you want to make sure that
@@ -52,6 +52,31 @@ https://etherscan.io/tx/0x2fd09c03609f3f34a326983f1c685ea1bcb87dfcaabc12932dbe38
 https://kovan.etherscan.io/tx/0x755b84a8a61fd82c1410f6bbbb452c94ddf12fac5b1daaa1496671bcd6e21882
 
 ```
+
+# How to setup dev environment
+
+1. git clone git@github.com:rstormsf/multisender.git
+2. cd contracts
+3. I used  `node -v v9.7.1`
+4. npm install
+5. deploy MultiSender contract OR use existing deployed version: 0xa5025faba6e70b84f74e9b1113e5f7f4e7f4859f
+currenty deployed on Kovan, Rinkeby, Ropsten, POA-network, POA-Sokol, Mainnet
+Instructions on how to deploy it is listed below.
+6. cd ..
+7. npm install
+8. cp .env.example .env
+9. open .env file and provide an address of multisender contract
+10. npm run start
+
+# Contract Deployment
+
+There are 2 ways to deploy the contracts: Upgradable and non-upgradable way.
+Non-upgrdable:
+ - cd contracts
+ - npm run flatten
+ - take `flats/UpgradebleStormSender_flat.sol` and deploy it using https://remix.ethereum.org/
+   - select solidity 0.4.23 version in settings
+ - once deployed, call `initialize` function with parameter address of owner's contract
 
 # Disclaimer
 This tool is not affiliated with https://poa.network
