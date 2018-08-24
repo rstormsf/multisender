@@ -42,7 +42,11 @@ export class FourthStep extends React.Component {
     }
   }
   componentDidMount(){
-    this.txStore.doSend()
+    try {
+      this.txStore.doSend()
+    } catch(e){
+      console.log('FROM UI', e)
+    }
   }
   render () {
     let totalNumberOftx;

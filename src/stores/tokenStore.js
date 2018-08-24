@@ -162,6 +162,26 @@ class TokenStore {
   }
 
   @action
+  async reset(){
+    this.decimals = '';
+    this.jsonAddresses = [{"0x0": "0"}];
+    this.tokenAddress = '';
+    this.defAccTokenBalance = ''
+    this.allowance = ''
+    this.currentFee = ''
+    this.tokenSymbol = ''
+    this.ethBalance = ''
+    this.balances_to_send = []
+    this.addresses_to_send = []
+    this.invalid_addresses = []
+    this.filteredAddresses = []
+    this.totalBalance = '0'
+    this.arrayLimit = 0
+    this.errors = []
+    this.dublicates = []
+  }
+
+  @action
   async parseAddresses(){
     this.addresses_to_send = []
     this.dublicates = []
@@ -169,38 +189,44 @@ class TokenStore {
     this.invalid_addresses = [];
     this.balances_to_send = [];
     return new Promise((res, rej) => {
-      
-      this.jsonAddresses.forEach((account) => {
-        const address = Object.keys(account)[0].replace(/\s/g, "");;
-        if(!Web3Utils.isAddress(address)){
-          this.invalid_addresses.push(address);
-        } else {
-          let balance = Object.values(account)[0];
-          this.totalBalance = new BN(balance).plus(this.totalBalance).toString(10)
-          balance = this.multiplier.times(balance);
-          const indexAddr = this.addresses_to_send.indexOf(address);
-          if(indexAddr === -1){
-            this.addresses_to_send.push(address);  
-            this.balances_to_send.push(balance.toString(10))
-          } else {
-            if(this.dublicates.indexOf(address) === -1){
-              this.dublicates.push(address);
-            }
-            this.balances_to_send[indexAddr] = (new BN(this.balances_to_send[indexAddr]).plus(balance)).toString(10)
+      try {
+        this.jsonAddresses.forEach((account, index) => {
+          if(Object.keys(account).length === 0){
+            rej({message: `There was an error parsing ${JSON.stringify(account)} at line ${index}`})
           }
+          const address = Object.keys(account)[0].replace(/\s/g, "");;
+          if(!Web3Utils.isAddress(address)){
+            this.invalid_addresses.push(address);
+          } else {
+            let balance = Object.values(account)[0];
+            this.totalBalance = new BN(balance).plus(this.totalBalance).toString(10)
+            console.log('balance,', balance)
+            balance = this.multiplier.times(balance);
+            const indexAddr = this.addresses_to_send.indexOf(address);
+            if(indexAddr === -1){
+              this.addresses_to_send.push(address);  
+              this.balances_to_send.push(balance.toString(10))
+            } else {
+              if(this.dublicates.indexOf(address) === -1){
+                this.dublicates.push(address);
+              }
+              this.balances_to_send[indexAddr] = (new BN(this.balances_to_send[indexAddr]).plus(balance)).toString(10)
+            }
+          }
+        })
+        
+        this.jsonAddresses = this.addresses_to_send.map((addr, index) => {
+          let obj = {}
+          obj[addr] = (new BN(this.balances_to_send[index]).div(this.multiplier)).toString(10)
+          return obj;
+        })
+        res(this.jsonAddresses)
+        if(this.tokenAddress === "0x000000000000000000000000000000000000bEEF") {
+          this.allowance = this.totalBalance
         }
-      })
-      
-      this.jsonAddresses = this.addresses_to_send.map((addr, index) => {
-        let obj = {}
-        obj[addr] = (new BN(this.balances_to_send[index]).div(this.multiplier)).toString(10)
-        return obj;
-      })
-      res(this.jsonAddresses)
-      if(this.tokenAddress === "0x000000000000000000000000000000000000bEEF") {
-        this.allowance = this.totalBalance
+      } catch(e){
+        rej(e)
       }
-
     })
   }
 

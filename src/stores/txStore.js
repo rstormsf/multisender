@@ -4,6 +4,7 @@ import ERC20ABI from "../abis/ERC20ABI"
 import MultiSenderAbi from "../abis/StormMultisender"
 import Web3 from "web3";
 import { observer } from "mobx-react";
+import swal from 'sweetalert';
 const BN = require('bignumber.js');
 
 
@@ -15,10 +16,21 @@ class TxStore {
     this.tokenStore = rootStore.tokenStore
     this.web3Store = rootStore.web3Store
     this.gasPriceStore = rootStore.gasPriceStore
+    this.interval = null;
+  }
+
+  @action
+  async reset() {
+    this.txs = []
+    this.txHashToIndex = {}
+    this.approval = '';
+    this.keepRunning = false;
+    clearInterval(this.interval);
   }
 
   @action
   async doSend(){
+    this.keepRunning = true;
     this.txs = [];
     this.approval = '';
     if(new BN(this.tokenStore.totalBalance).gt(new BN(this.tokenStore.allowance))){
@@ -36,6 +48,7 @@ class TxStore {
           }
         }
       }, 3000)
+      this.interval = interval;
     } else {
       this._multisend({slice: this.tokenStore.totalNumberTx, addPerTx: this.tokenStore.arrayLimit})
     }
@@ -56,6 +69,7 @@ class TxStore {
   
       })
       .on('error', (error) => {
+        swal("Error!", error.message, 'error')
         console.error(error)
       })
     } catch (e){
@@ -65,6 +79,9 @@ class TxStore {
   }
 
   async _multisend({slice, addPerTx}) {
+    if(!this.keepRunning){
+      return
+    }
     const token_address = this.tokenStore.tokenAddress
     let {addresses_to_send, balances_to_send, proxyMultiSenderAddress, currentFee, totalBalance} =  this.tokenStore;
     
@@ -106,14 +123,14 @@ class TxStore {
       })
 
       .on('transactionHash', (hash) => {
-        // console.log('txHash',hash)
         this.txHashToIndex[hash] = this.txs.length
-        this.txs.push({status: 'pending', name: `Sending Batch #${this.txs.length + 1} ${this.tokenStore.tokenSymbol}\n
+        this.txs.push({status: 'pending', name: `Sending Batch #${this.txs.length} ${this.tokenStore.tokenSymbol}\n
           From ${addresses_to_send[0]} to: ${addresses_to_send[addresses_to_send.length-1]}
         `, hash})
         this.getTxStatus(hash)
       })
       .on('error', (error) => {
+        swal("Error!", error.message, 'error')
         console.log(error)
       })
       slice--;
@@ -140,6 +157,9 @@ class TxStore {
 
   async getTxStatus(hash) {
     console.log('GET TX STATUS', hash)
+    if(!this.keepRunning){
+      return
+    }
     setTimeout(() => {
       const web3 = this.web3Store.web3;
       web3.eth.getTransactionReceipt(hash, (error, res) => {

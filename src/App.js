@@ -28,8 +28,8 @@ export class App extends React.Component {
     this.web3Store = props.UiStore.web3Store;
   }
   render(){
-    let startedUrl = this.web3Store.startedUrl
-    console.log('fix eth multisend')
+    let startedUrl = this.web3Store.startedUrl;
+    console.log('fix reset');
     return (
       <div>
         <Header />

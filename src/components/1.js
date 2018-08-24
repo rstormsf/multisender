@@ -50,6 +50,7 @@ export class FirstStep extends React.Component {
   constructor(props){
     super(props);
     this.tokenStore = props.UiStore.tokenStore;
+    this.txStore = props.UiStore.txStore;
     this.web3Store = props.UiStore.web3Store;
     this.web3Store.setStartedUrl('#/');
     this.onTokenAddress = this.onTokenAddress.bind(this);
@@ -66,6 +67,11 @@ export class FirstStep extends React.Component {
     this.parseCompleted = false;
     this.list = [];
   }
+
+  componentDidMount() {
+    this.tokenStore.reset()
+    this.txStore.reset()
+  }
   async onTokenAddress(e){
     if(!e){
       this.setState({tokenAddress: {label: '', value: ''}})
@@ -78,6 +84,7 @@ export class FirstStep extends React.Component {
     }
   }
   onSelectFormat(newFormat){
+    this.parseCompleted = false;
     if(newFormat === 'csv'){
       this.setState({format: newFormat, placeholder: `
 0xCBA5018De6b2b6F89d84A1F5A68953f07554765e,12
@@ -178,28 +185,46 @@ export class FirstStep extends React.Component {
     return
   }
   async onSubmit(e){
-    e.preventDefault()
-    if(this.state.format === ''){
-      swal("Error!", "Please select format CSV or JSON", 'error')
-      return
-    }
-    
-    if(!this.parseCompleted){
-      if(this.state.format === 'json') {
-        this.onJsonChange(this.list)
-      } else {
-        await this.onCsvChange(this.list)
+    try {
+      e.preventDefault()
+      if(this.state.format === ''){
+        swal("Error!", "Please select format CSV or JSON", 'error')
+        return
       }
-    }
-    await this.tokenStore.parseAddresses()
-    if(this.tokenStore.invalid_addresses.length > 0){
+      
+      if(!this.parseCompleted){
+        if(this.state.format === 'json') {
+          this.onJsonChange(this.list)
+        } else {
+          await this.onCsvChange(this.list)
+        }
+      }
+      await this.tokenStore.parseAddresses()
+      console.log('length of addresses', this.tokenStore.jsonAddresses.length)
+      if(this.tokenStore.jsonAddresses.length === 0){
+        swal({
+          title: "The address list is empty.",
+          text: "Please make sure you set correct CSV or JSON format in input selector",
+          icon: "error",
+        })
+        return
+      }
+      if(this.tokenStore.invalid_addresses.length > 0){
+        swal({
+          title: "There are invalid eth addresses. If you click Next, multisender will remove them from the list.",
+          text: JSON.stringify(this.tokenStore.invalid_addresses.slice(), null, '\n'),
+          icon: "error",
+        })
+      } else {
+        this.props.history.push('/3')
+      }
+    } catch(e) {
+      console.error(e)
       swal({
-        title: "There are invalid eth addresses. If you click Next, multisender will remove them from the list.",
-        text: JSON.stringify(this.tokenStore.invalid_addresses.slice(), null, '\n'),
+        title: "Parsing Error",
+        text: e.message,
         icon: "error",
       })
-    } else {
-      this.props.history.push('/3')
     }
     return
   }
