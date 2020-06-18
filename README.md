@@ -27,7 +27,6 @@ everything will work as expected.
 Contracts deployed:  
 Mainnet, Rinkeby, Kovan, Ropsten, Sokol, CORE-POA:  
 ProxyStorage: 0xa5025faba6e70b84f74e9b1113e5f7f4e7f4859f  
-Implementation: 0x97f76edb9d631590558b5c23f27a2a4711c0c964  
 
 Example JSON:
 ```json
